@@ -56,10 +56,6 @@ dist
 /examples/hitart/reports/dtx-style.sty
 /examples/hitart/reports/hithesis.bst
 *.cfg
-*.sty
-*.bst
-*.ist
-hithesis.bst
 *.ins
 /bthesistitle.eps
 *.eps
