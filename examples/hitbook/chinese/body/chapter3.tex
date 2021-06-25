@@ -8,9 +8,341 @@
 
 \section{针对依存分析器的对抗样本攻击框架}[Adversarial Attacking Framework against Dependency Parsers]
 
+研究表明，在深度神经网络输入中加入微小扰动信息，能够使其产生误判。
+这种使神经网络产生误判的攻击称为对抗样本攻击，其中使用的输入样本称为对抗样本。
+尽管基于深度神经网络的模型在自然语言处理领域的很多任务上都取得了很好的成果，但对抗样本攻击揭示了这类模型脆弱的一面。
+为了提高现有依存分析器的鲁棒性，使其适用于现实复杂场景，我们首先设计对抗样本攻击算法，针对现有各类依存分析器生成对抗样本，并对生成的样本进行分析，在此基础上提出了增强分析器鲁棒性的方法。
+
+根据攻击者对目标系统的了解程度，对抗样本攻击可以大致分为白盒攻击和黑盒攻击两类。
+在白盒攻击情景下，攻击者能获取目标系统的所有信息，包括模型结构，参数及权重值等。
+而在黑盒攻击情景下，攻击者仅能用对目标系统查询的方式，通过输入观察输出结果。
+这里我们选择更贴近现实情况的黑盒攻击情景，设计了一个黑盒攻击框架，针对现有依存分析器生成对抗样本。
+图~\ref{fig:adv-example}展示了一个我们的攻击框架生成的对抗样本，其中上半部分为原始文本及正确的依存句法预测结果，下半部分为我们生成的对抗样本及目标分析器预测结果（红色部分表示预测错误的依存弧和标签）。
+在该实例中，我们的攻击框架只修改了一个词（将highway改为superhighway），就使得目标分析器产生了5个错误。
+
+\begin{figure}[htbp]
+	\centering
+	\begin{dependency}[theme = simple,label style={font=\bfseries}]
+		\begin{deptext}[column sep=0.45em]
+			A\& bus\& is\& the\& data\& \textcolor{green}{highway}\& within\& a\& computer \\ %\& . \\
+			A\& bus\& is\& the\& data\& \textcolor{red}{\textit{\textbf{superhighway}}}\& within\& a\& computer \\%\& . \\
+		\end{deptext}
+		\deproot{6}{root}
+		\depedge{2}{1}{det}
+		\depedge{6}{2}{nsubj}
+		\depedge{6}{3}{cop}
+		\depedge{6}{4}{det}
+		\depedge{6}{5}{nn}
+		\depedge{6}{7}{prep}
+		\depedge{9}{8}{det}
+		\depedge{7}{9}{pobj}
+		%\depedge{6}{10}{punct}
+		
+		\deproot[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{\textit{root}}
+		\depedge[edge below, label style={below}]{2}{1}{det}
+		\depedge[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{2}{nsubj}
+		\depedge[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{3}{cop}
+		\depedge[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{4}{det}
+		\depedge[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{6}{\textit{partmod}}
+		\depedge[edge below, label style={below}]{6}{7}{prep}
+		\depedge[edge below, label style={below}]{9}{8}{det}
+		\depedge[edge below, label style={below}]{7}{9}{pobj}
+		%\depedge[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{10}{\textit{punct}}
+	\end{dependency}
+	\caption{对抗样本实例}
+	\label{fig:adv-example}
+\end{figure}
+
+下面我们首先给出针对依存分析器攻击的形式化定义。
+给定包括所有可能输入句子$\mathbf{x}$的输入文本空间$\mathcal{X}$和包括$\mathbf{x}$所有可能依存树的输出空间$\mathcal{Y}$。
+一个依存分析器$F: \mathcal{X} \rightarrow \mathcal{Y}$的目标是学习一个从输入句子$\mathbf{x}$到其对应依存树$\mathbf{y}$的映射，记为$F(\mathbf{x}) = \mathbf{y}$。
+句子$\mathbf{x}$中的第$i$个词记为$x_i$，用$(i,j,r) \in \mathbf{y}$表示依存树$\mathbf{y}$中存在一条由$x_i$指向$x_j$，标签为$r$的弧。
+
+给定一个句子$\mathbf{x}$，我们通过对其进行微小的修改获得$\mathbf{x}^*$，当$\mathbf{x}^*$满足以下条件时，将其称为一个有效的对抗样本：
+$$F(\mathbf{x}^*) \neq \mathbf{y}, \sigma(\mathbf{x}^*, \mathbf{x})\le \epsilon, $$
+其中$\sigma$为样本变化约束函数，$\epsilon$为原始句子$\mathbf{x}$与对抗样本$\mathbf{x}^*$间可允许的最大差别。
+
+我们提出的针对依存分析器的黑盒攻击框架如算法~\ref{alg:black-box}所示，由词重要性排序（1-4行）、候选词生成（第7行）和替换词搜索（8-21行）三部分组成。
+其基本思路是对句中每个词生成若干能保证句法结构不变和语法正确的候选词，按照句中词的重要性由高到低搜索并替换能使目标分析器预测准确率下降的候选词。
+
+\begin{algorithm}[!h]
+	\begin{small}
+		\small
+		\caption{黑盒攻击}
+		\label{alg:black-box}
+		\begin{flushleft}
+			\textbf{输入:} 原始样本 $\mathbf{x}^{(0)}=\{x_1,x_2,\dots,x_N\}$, 最大允许修改百分比 $\gamma$ \\
+			\textbf{输出:} 对抗样本 $\mathbf{x}^{(i)}$
+		\end{flushleft}
+		\begin{algorithmic}[1]
+			\FOR{$i=1$ to $N$}
+			\STATE 用公式~\ref{eq:word-importance}计算词重要性$I(\mathbf{x}^{(0)},x_i)$
+			\ENDFOR
+			\STATE 建立一个由$x_i\in\mathbf{x}^{(0)}$组成的集合$W$，其中词按照重要性$I(\mathbf{x}^{(0)},x_i)$从高到低排序
+			\STATE $t=0$
+			\FOR{$W$中每个$x_j$}
+			\STATE 按照候选词生成步骤建立词$x_j$的候选词集合$\mathcal{C}_j$
+			\STATE 初始化有效候选词集合$\mathcal{VC} \leftarrow \{\}$
+			\FOR{$\mathcal{C}_j$中每个候选词$c_k$}
+			\STATE 用公式~\ref{eq:mis-inc}计算准确率该变量$S(\mathbf{x}^{(t)},c_k,j)$
+			\STATE \algorithmicif\  $S(\mathbf{x}^{(t)},c_k,j) \le 0$\ \algorithmicthen\ continue\ \algorithmicendif
+			\STATE 将$c_k$加入集合$\mathcal{VC}$
+			\ENDFOR
+			\IF{$\mathcal{VC}$非空}
+			\STATE $c^* = \argmaxl_{c \in \mathcal{VC}} S(\mathbf{x}^{(t)},c,j)$
+			\STATE $t = t + 1$
+			\STATE $\mathbf{x}^{(t)} \leftarrow \text{将} \mathbf{x}^{(t-1)} \text{中的} x_j  \text{替换为} c^*$
+			\STATE \algorithmicif\  $t \ge \gamma \cdot N $\ \algorithmicthen\   \algorithmicreturn\ $\mathbf{x}^{(t)}$\ \algorithmicendif
+			\ENDIF
+			\ENDFOR
+			\STATE \algorithmicif\  $t > 0$\ \algorithmicthen\   \algorithmicreturn\ $\mathbf{x}^{(t)}$\ \algorithmicelse\ \algorithmicreturn\ None \algorithmicendif
+		\end{algorithmic}
+	\end{small}
+\end{algorithm}
+
+
+\subsection{词重要性排序}[Word Importance Ranking]
+
+在一个句子中，不同的词对于模型的预测结果会产生不同程度的影响，我们将这种影响的大小视为词的重要性，对句中词按重要性进行排序。
+此前的方法通过将句中词逐个替换为未知标签并计算替换前后模型预测结果的改变获得词的重要性。\cite{li2016visualizing,ren2019generating}
+针对依存分析任务，我们用替换前后无标记依存正确率（Unlabled Attachment Score，UAS）和带标记依存正确率（Labled Attachment Score，LAS）的改变量作为衡量词重要性的分数。
+具体来说，句子$\mathbf{x}$中词$x_i$的重要性为：
+
+\begin{equation}
+	\label{eq:word-importance}
+	I(\mathbf{x},x_i) = \lambda_{arc}\Delta_\text{UAS}(\mathbf{x},\hat{\mathbf{x}_i}) + (1-\lambda_{arc})\Delta_\text{LAS}(\mathbf{x},\hat{\mathbf{x}_i}),
+\end{equation}
+其中$\mathbf{x} = x_1x_2\dots x_i\dots x_N$为原始句子，$\hat{\mathbf{x}_i} = x_1x_2\dots \text{UNK}\dots x_N$为将词$x_i$替换为特殊未知词标签UNK的修改后句子。
+$\Delta_\text{UAS}(\mathbf{x},\hat{\mathbf{x}_i}) = \text{UAS}(F(\mathbf{x})) - \text{UAS}(F(\hat{\mathbf{x}_i})) $和$\Delta_\text{LAS}(\mathbf{x},\hat{\mathbf{x}_i}) = \text{LAS}(F(\mathbf{x})) - \text{LAS}(F(\hat{\mathbf{x}_i}))$分别表示修改前后UAS和LAS的改变量。
+$\lambda_{arc}$为用于调节依存弧和标签之间相对重要性的系数。在实验中我们将其设为0.5。
+
+
+\subsection{候选词生成}[Generation of Substitute Candidates]
+\label{sec:gen-cand}
+
+候选词生成中我们针对句中每个目标词，生成若干候选词，为后续的替换做准备，这一步很大程度上影响到了攻击成功率和对抗样本的质量。
+此前的工作尝试了包括基于语言模型的\cite{zheng2020evaluating}、基于词向量的\cite{alzantot2018generating}、基于同义词的\cite{ren2019generating}和基于义原（Sememe）的\cite{zang2020word}生成策略。
+这些策略各自存在不同的问题，前两类生成的候选词质量无法保证，而后两类生成候选词的数量受到限制。
+为了解决这些问题，我们首先同时用这四类策略生成候选词集合，之后使用四种过滤策略过滤掉不合适的候选词，从而同时保证了候选词的质量和数量。
+
+我们首先用以下四种策略生成候选词：
+
+\textbf{基于语言模型的方法} \ \ 我们使用预训练的语言模型（BERT），将目标词逐一遮盖（mask）并用其上下文重新预测该词，选取前$k$个作为候选词。
+
+\textbf{基于词向量的方法} \ \ 我们使用Mrksic等人的词向量\cite{mrksic2016counter}的cosine相似度计算每个目标词的N个最近的词，将其作为候选词。
+
+\textbf{基于近义词的方法} \ \ 我们使用WordNet\footnote{\url{https://wordnet.princeton.edu}}抽取每个目标词的所有近义词作为候选词。
+
+\textbf{基于义原的方法} \ \ 义原在语言学中指最小的不可再分的语义单位。\cite{dong2006hownet} 对于每个候选词，我们根据HowNet中定义的义原，收集所有至少有一个义原与其重复的词作为其候选词。
+
+在用上述方法获得若干候选词之后，我们依次使用以下四种过滤策略，将候选词集合中不合适的词过滤掉：
+
+\textbf{词性过滤} \ \ 我们首先过滤掉候选词中与目标词词性不同的，这是为了确保替换后句法结构不变。
+
+\textbf{语法检测过滤} \ \ 我们使用公开的语法检测工具\footnote{\url{https://pypi.org/project/language_tool}}过滤掉替换后会引入语法错误的候选词，从而进一步确保句法结构的不变性和语法的正确性。
+
+
+\textbf{词向量相似度过滤} \ \ 我们使用词向量cosine相似度过滤掉与目标词相似度低于$\epsilon_w$的候选词。
+
+\textbf{困惑度过滤} \ \ 对于每个候选词$c \in \mathcal{C}$，我们使用预训练的语言模型GPT-2计算原始句子$\mathbf{x}$和替换后句子$\mathbf{x}^c_{i}$的困惑度，定义困惑度增量为：
+\begin{equation}
+	\label{eq:ppl-inc}
+	\Delta \text{ppl}(\mathbf{x},c,i)=\max(\text{ppl}(\mathbf{x}^c_{i})-\text{ppl}(\mathbf{x}), 0),
+\end{equation}
+其中$\mathbf{x}^c_{i}$为将原始文本$\mathbf{x}$的第$i$个词替换为$c$后的文本。
+我们将$\Delta\text{ppl}(\mathbf{x},c,i) > \epsilon_p$的候选词过滤掉。
+
+
+\subsection{替换词搜索}[Best Substitute Searching]
+
+在这一步，我们用贪心搜索策略按照目标词重要性由高到底搜索其候选词，找到合适的替换词。
+为了保持句子的句法结构不变，在搜索中我们不允许替换代词、冠词、连词、数字、感叹词、限定疑问词和标点符号。
+此外，为了控制修改词的个数，在实验中我们设置了最大允许修改百分比$\gamma$（实验中设为15\%）。
+
+具体来说，给定句子$\mathbf{x}$，我们按照目标词重要性从高到低对其进行排序，并按此顺序进行搜索。
+对每个目标词$x_i$，我们用其候选词集合$\mathcal{C}$中的每个候选词$c$构建一个对抗样本$\mathbf{x}^c_{i} = x_1x_2\dots c\dots x_N$，并计算目标分析器分别以$\mathbf{x}$和$\mathbf{x}^c_{i}$为输入时的准确率差值：
+
+\begin{equation}
+	\begin{aligned}
+		\label{eq:mis-inc}
+		S(\mathbf{x},c,i) = & \lambda_{arc}\Delta_\text{UAS}(\mathbf{x},\mathbf{x}^c_{i}) + \\ 
+		& (1-\lambda_{arc})\Delta_\text{LAS}(\mathbf{x},\mathbf{x}^c_{i}),
+	\end{aligned}
+\end{equation}
+其中$\Delta_\text{UAS}(\mathbf{x},\mathbf{x}^c_{i}) = \text{UAS}(F(\mathbf{x})) - \text{UAS}(F(\mathbf{x}^c_{i})) $和$\Delta_\text{LAS}(\mathbf{x},\mathbf{x}^c_{i}) = \text{LAS}(F(\mathbf{x})) - \text{LAS}(F(\mathbf{x}^c_{i}))$分别为UAS和LAS的改变量。 
+$\lambda_{arc}$是一个控制依存弧和标签相对重要性的系数，在实验中设为0.5。
+
+如果没有一个候选词$c$使得$S(\mathbf{x},c,i) > 0$，换句话说，如果没有候选词能马上使准确率降低，则跳过这个目标词，开始搜索下一个目标词的候选词。
+否则，我们就选择准确率该变量$S(\mathbf{x},c,i)$最大的候选词$c$，并用其替换$x_i$。
+接着，如果该句子中已修改的词占比超过了$\gamma$，则停止搜索返回当前句子。
+否则继续搜索下一个目标词的候选词。
+
+
 \section{对抗样本攻击实验结果与分析}[Experiments and Analysis of Adversarial Attack]
 
+
 \subsection{实验设置}[Experimental Settings]
+
+
+\subsection{实验结果}[Results]
+
+我们在依存句法分析领域应用最广的宾州树库（Penn Treebank，PTB）上测试了我们的攻击框架，并与此前工作进行了对比。
+我们选择了依存分析任务中两个具有代表性的分析器Biaffine分析器\cite{dozat2017deep}和Stack-Pointer分析器\cite{ma2018stack}作为攻击目标，其中前者是基于图的分析器，后者是基于转移的分析器。
+在目前广泛应用的深度神经网络模型中，输入词向量往往对模型性能产生至关重要的影响。
+为了测试不同类型的词表示作为输入时目标分析器的鲁棒性，我们选择了以下四种有代表性的词表示：
+
+\textbf{GloVe}\cite{pennington2014glove}是一个常用的固定上下文无关词向量。
+
+\textbf{RoBERTa}\cite{liu2019roberta}是一个预训练语言模型，其训练目标为掩码语言模型（masked language modeling，MLM），目标是通过上下文预测被遮盖的词。 该模型生成的是上下文相关子词（sub-word）向量。
+
+\textbf{ELECTRA}\cite{clark2020electra}是另一个预训练语言模型，其训练目标为替换词检测（ replaced token detection），目标是预测被修改的输入文本中哪个词被修改过。
+该模型生成的是上下文相关子词（sub-word）向量。
+
+\textbf{ELMo}\cite{peters2018deep}是一个基于字母向量的预训练语言模型，其训练目标为双向语言模型。 
+
+\begin{table}[h]
+	\centering
+	\small
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{l|cccc}
+		\hline
+		\bf 模型& \bf 原始UAS & \bf 攻击后UAS & \bf 成功率\% & \bf 平均修改词数 \\
+		\hline
+		\bf Zheng et al. & 95.52 & 88.69 & 51 & 2.23 \\
+		\textbf{Ours} & 95.45 & \bf 86.53 & \bf 52 & \bf 1.36 \\
+		\hline
+	\end{tabular}
+	\caption{PTB-SD-3.3.0-COP测试集上的结果} 
+	\label{tbl:attack-cop}
+\end{table}
+
+表~\ref{tbl:attack-cop}中列出了我们的模型（\textbf{Ours}）与此前工作的对比。
+由于Zheng等人对PTB的预处理与普遍使用的略有不同，我们为了与他们的结果进行对比，先用他们的处理方式生成了PTB-SD-3.3.0-COP数据集并在该数据集上与他们进行了对比。
+实验结果表明我们的方法获得了更高的攻击成功率。
+此外，我们的平均修改词数几乎只有他们的一半，这说明我们的攻击效率要显著高于他们。
+
+为了进一步对比各攻击方法生成的对抗样本的质量，我们采用人工评价的方法，从句法结构不变性和语法正确性两方面对样本质量进行评价。
+为了评价句法结构不变性，我们随机选择了100个句子和对应的对抗样本，让三位人类评价者判断修改后是否改变了句法结构。
+结果显示其中87\%的句子句法结构都是不变的。而Zheng等人进行的相同人工评价结果显示他们的对抗样本中仅75\%的句子句法结构不变。
+为了评价语法正确性，我们随机挑选了100个句子，将我们和他们模型生成的对抗样本同时提供给人类评价者，让其选择哪个样本更好的保证了语法正确性（允许选择二者语法正确性同样好）。
+结果显示对于56\%的句子我们的对抗样本更好，对于19\%的句子他们的更好，剩余25\%二者同样好。
+
+\begin{table}[htbp]
+	\centering
+	\small
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{l|l||cc|cc|c|c}
+		\hline
+		\multirow{2}{*}{\bf 分析器}&\multirow{2}{*}{\bf 输入}& \multicolumn{2}{c|}{\bf 原始结果} & \multicolumn{2}{c|}{\bf 攻击后结果} & \multirow{2}{*}{\bf 成功率\%} & \multirow{2}{*}{\bf 平均修改词数} \\
+		\cline{3-6}
+		& & \bf UAS & \bf LAS & \bf UAS & \bf LAS & & \\
+		\hline
+		\multirow{4}{*}{\bf Biaffine} & \bf Glove &95.51 & 93.71 &87.79 &83.57 &61.4 &1.28 \\
+		& \bf ELMo  &96.38 &94.60 &91.00 &87.40 &50.1 &0.95 \\
+		& \bf ELECTRA &97.09 & 95.35 &90.63 &86.97 &55.8 &1.10 \\
+		& \bf RoBERTa &96.83 & 95.15 &92.54 &89.26 &49.2 &0.89 \\
+		\hline
+		\hline
+		\multirow{4}{*}{\bf Stack-Pointer} & \bf Glove &95.10 & 93.29 &87.71 &83.45 &59.3 &1.12 \\
+		& \bf ELMo    &95.69 & 93.79 &89.93 &86.28 &49.3 &0.88 \\
+		& \bf ELECTRA &96.90 & 95.16 &90.11 &86.39 &56.1 &1.08 \\
+		& \bf RoBERTa &96.64 & 94.83 &92.39 &89.09 &48.8 &0.87 \\
+		\hline
+	\end{tabular}
+	\caption{PTB-SD-3.3.0测试集上的结果} 
+	\label{tbl:attack-main}
+\end{table}
+
+为了方便此后的工作进行对比，我们使用PTB普遍的预处理方式生成的PTB-SD-3.3.0数据集，并在该数据集上进行了大量实验，对比了两类分析器和四类词向量在我们的攻击框架下的性能，结果见表~\ref{tbl:attack-main}。
+结果显示基于图的Biaffine分析器在输入向量相同的情况下普遍好于基于转移的Stack-Pointer分析器，而二者面对对抗样本攻击时鲁棒性差距不大。
+在四种输入表示中，ELECTRA在原始文本作为输入时取得最好实验结果，RoBERTa次之，GloVe最差。
+但在面对对抗样本攻击时，RoBERTa表现最好，ELMo也表现出了近似的鲁棒性，而ELECTRA则变现的很不好，其攻击成功率仅次于GloVe。
+我们推测这可能是因为ELECTRA的训练目标是预测句中哪个词被修改过，而这种训练目标使得其将很多正确的替换词也视为错误，从而降低了它的鲁棒性。
+
+
+\begin{table}[h]
+	\centering
+	\small
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{l||cc|cc|c}
+		\hline
+		\multirow{2}{*}{\bf 词表}& \multicolumn{2}{c|}{\bf 原始结果} & \multicolumn{2}{c|}{\bf 攻击后结果} & \multirow{2}{*}{\bf 成功率\%} \\
+		\cline{2-5}
+		& \bf UAS & \bf LAS & \bf UAS & \bf LAS & \\
+		\hline
+		\bf Base &\multirow{3}{*}{95.51} & \multirow{3}{*}{93.71} &87.79 &83.57 &61.4 \\
+		\bf Large  & & &88.39 &84.37 &58.7 \\
+		\bf Base (T.) && &89.97 &86.67 &49.7 \\
+		\hline
+	\end{tabular}
+	\caption{不同词表大小模型在PTB-SD-3.3.0测试集上的结果} 
+	\label{tbl:oov-oot-result}
+\end{table}
+
+\begin{table}[h]
+	\centering
+	\small
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{l||cc|cc}
+		\hline
+		\multirow{2}{*}{\bf 词表}& \multicolumn{2}{c|}{\bf 原始结果} & \multicolumn{2}{c}{\bf 攻击后结果}  \\
+		\cline{2-5}
+		& \bf OOV & \bf OOT & \bf OOV & \bf OOT \\
+		\hline
+		\bf Base &7 &39 &1192 &1207 \\
+		\bf Large  &0 &34 &1 &995  \\
+		\bf Base (T.) &3 &19 &0 &0 \\
+		\hline
+	\end{tabular}
+	\caption{表~\ref{tbl:oov-oot-result}中未登录词和未在训练集出现词数}
+	\label{tbl:oov-oot-num}
+\end{table}
+
+为了探究未登录（Out-of-Vocabulary，OOV）词和未在训练集出现（Out-of-Training，OOT）词对于对抗样本攻击的影响，我们用Biaffine分析器和GloVe向量进行了实验，在训练时使用不同大小的词表，实验结果见表~\ref{tbl:oov-oot-result}。
+其中\textbf{Base}模型词表大小为39073，而\textbf{Large}模型词表大小为371025。
+\textbf{Base (T.)}表示在对\textbf{Base}模型攻击时只允许从训练集中出现过的词中搜索替换词。
+而相应的攻击前后未登录词和未在训练集出现词的数量见表~\ref{tbl:oov-oot-num}。
+对比\textbf{Base}和\textbf{Large}模型被攻击前后的实验结果及未登录词数量统计，我们有理由认为对抗样本中出现的未登录词会引起模型预测错误。
+而更大的词表能通过降低未登录词出现的可能性从而有效增强模型的鲁棒性。
+此外，通过对比\textbf{Base}和\textbf{Base (T.)}的结果，我们可以认为未在训练集中出现过的词也会降低模型预测的准确率。
+
+针对未在训练集中出现过的词，一个可能的解决方案是对抗学习，即使用对抗攻击算法对训练数据生成对抗样本，然后用原始训练数据和对抗样本混合训练分析器。
+此前的工作\cite{zheng2020evaluating}已证明此方法的有效性。
+然而在现实情况下我们很难在训练时就获知对抗攻击算法，而且使用这种对抗学习也有使得模型过拟合到对抗样本的风险。
+因此我们基于上文实验的观察结果，提出几种不需要对抗攻击算法就能增强模型鲁棒性的方法。
+
+\begin{itemize}
+	\item \textbf{使用更大的词表（Large）} \ \ 更大的词表能够降低未登录词在对抗样本中出现的可能性，从而有效增强模型的鲁棒性。
+	\item \textbf{未知词替换（UNK）} \ \ 在训练过程中将不常见的词替换为特殊的未知词表示UNK，在预测过程中如果出现未登录词，则用UNK代替，这样能确保即使遇到未登录词，模型也能对其表示有一个估计。
+	\item \textbf{模型融合（ensemble）} \ \ 融合多个用不同随机初始化种子训练的模型能有效增加系统的稳定性，从而增强模型的鲁棒性。
+\end{itemize}
+
+\begin{table}[h]
+	\centering
+	\small
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{l||cc|cc|c}
+		\hline
+		\multirow{2}{*}{\bf 强化策略}& \multicolumn{2}{c|}{\bf 原始结果} & \multicolumn{2}{c|}{\bf 攻击后结果} & \multirow{2}{*}{\bf 成功率\%} \\
+		\cline{2-5}
+		& \bf UAS & \bf LAS & \bf UAS & \bf LAS & \\
+		\hline
+		\bf Base &95.51 &93.71 &87.79 &83.57 &61.4 \\
+		\bf Large &95.51 &93.71 &88.39 &84.37 &58.7 \\
+		\bf Large+UNK &95.57 &93.77 &88.98 &85.15 &57.0 \\
+		\bf Large+UNK+ensemble &95.62 &93.80 &89.49 &85.53 &55.8 \\
+		\hline
+	\end{tabular}
+	\caption{PTB-SD-3.3.0测试集上的鲁棒性测试结果} 
+	\label{tbl:attack-increase}
+\end{table}
+
+表~\ref{tbl:attack-increase}中列出了使用上述策略后模型面对对抗样本攻击的实验结果。
+结果显示这三种策略都能有效提高模型鲁棒性，降低攻击成功率。
+当这三者结合起来的时候效果最好。
+由于我们在训练过程中没有使用任何对抗样本，这三种策略也没有使模型过拟合到某种特定攻击的风险。
+这部分工作已投往AAAI 2021，后续计划将该攻击框架的目标扩展到语义依存图分析。
+
 
 \section{依存分析模型的鲁棒性提升方法}[Robustness Increasing Approaches for Dependency Parsers]
 

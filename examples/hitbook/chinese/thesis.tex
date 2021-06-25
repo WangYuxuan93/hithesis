@@ -96,8 +96,23 @@
 %   含义：字距设置为规范规定33个字还是word中34个字。默认regu。
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{hithesis}
+\usepackage{algorithmic}
 
 \graphicspath{{figures/}}
+
+% My packages
+\usepackage{tikz-dependency}
+
+
+% My command
+\newcommand{\PreserveBackslash}[1]{\let\temp=\\#1\let\\=\temp}
+\newcolumntype{C}[1]{>{\PreserveBackslash\centering}p{#1}}
+\newcolumntype{R}[1]{>{\PreserveBackslash\raggedleft}p{#1}}
+\newcolumntype{L}[1]{>{\PreserveBackslash\raggedright}p{#1}}
+
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand*{\argmaxl}{\argmax\limits}
+
 
 \begin{document}
 \frontmatter
