@@ -84,7 +84,7 @@
 同时提出一种基于栈-长短时记忆网络的分类器，利用当前转移状态预测下一步转移动作，从而实现了对语义依存图的自动分析。
 %使用了两种新的神经网络模块（Incremental Tree-LSTM和Bi-LSTM Subtraction）对转移系统中十分重要的子图和缓存部分进行建模，
 
-\textbf{2.基于对抗样本的依存分析器鲁棒性研究：}
+\textbf{2.非规范文本语义依存图分析：}
 尽管基于深度学习的依存分析器在规范的文本组成的语料库上获得了较好的性能，其在非规范文本上的性能却有显著下降。
 针对这一问题，本文设计了对抗样本攻击框架用于生成使分析器产生误判的非规范文本，并利用此框架对基于深度学习的依存分析器的鲁棒性进行深入探究。
 本文进一步提出模型融合和对抗样本训练方法，有效提升了基于深度学习的依存分析器的鲁棒性。
@@ -127,7 +127,7 @@ This paper focus on the parsing approach and application method of Chinese seman
 We propose to parse semantic dependency graph with a transition-based method and design a transition system for graph parsing. 
 Besides, we propose a neural classifier based on Stack-LSTM, which predicts the next transition action based on the current transition state. 
 
-\textbf{2.\ Research on dependency parsers' robustness based on adversarial attacks:} 
+\textbf{2.\ Semantic Dependency Graph Parsing on Informal Texts:} 
 Although neural dependency parsers achieve fair results on datasets consisting of formal texts, its performance is much lower when applied to informal texts. 
 We propose an adversarial attack framework that generates adversarial examples and explore the robustness of neural dependency parsers with it. 
 We further propose to improve the neural parsers' performance by model ensembling and adversarial training. 
