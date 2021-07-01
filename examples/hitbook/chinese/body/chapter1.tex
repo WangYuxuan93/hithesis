@@ -30,7 +30,7 @@
 
 1. 语义依存图分析方法。
 语义依存图分析器的设计，是该领域最基本也是最重要的问题。
-得益于语义依存图与传统句法依存树的相似性，依存图的分析方法可以从大量的依存句法分析任务中借鉴经验。
+得益于语义依存图与传统句法依存树的相似性，依存图的分析方法可以从大量的句法依存分析工作中借鉴经验。
 但图结构在带来更全面的语义表示的同时，也给语义依存分析任务带来了巨大的挑战。
 对于依存树结构，每个词只有一个父节点，而在依存图中，每个词可能有多个父节点，这给分析系统带来了很大的不确定性，从而增加了语义依存分析任务的难度。
 这也是依存图分析器的设计中亟需解决的研究课题。
@@ -64,7 +64,7 @@
 	\begin{center}
 			\begin{dependency}[arc edge, arc angle=80, text only label, label style={above}]
 				\begin{deptext} [row sep=0.6cm, column sep=.5cm]
-					\ ROOT$_0$ \& 早起 $_1$ \& 使$_2$ \& 人$_3$ \&  健康$_4$ \\
+					\ ROOT \& 早起 \& 使 \& 人 \&  健康 \\
 				\end{deptext}
 				\depedge{1}{3}{\color{black}Root}
 				\depedge{3}{2}{\color{black}Exp}
@@ -73,7 +73,7 @@
 				\depedge{5}{4}{\color{black}Exp}
 				
 				\depedge[edge below]{1}{3}{\color{black}root}
-				\depedge[edge below]{3}{2}{\color{black}nsub}
+				\depedge[edge below]{3}{2}{\color{black}nsubj}
 				\depedge[edge below]{3}{4}{\color{black}dobj}
 				\depedge[edge below]{3}{5}{\color{black}dep}
 			\end{dependency}
@@ -96,7 +96,7 @@
 	\begin{center}
 			\begin{dependency}[arc edge, arc angle=80, text only label, label style={above}]
 				\begin{deptext} [row sep=0.4cm, column sep=.1cm]
-					\ ROOT$_0$ \& 张三 $_1$ \& 昨天$_2$ \& 告诉$_3$ \&  李四$_4$  \& 一件$_5$ \& 事$_6$ \\
+					\ ROOT \& 张三 \& 昨天 \& 告诉 \&  李四  \& 一件 \& 事 \\
 				\end{deptext}
 				\depedge{1}{4}{\color{black}Root}
 				\depedge{4}{2}{\color{black}Agt}
@@ -113,7 +113,7 @@
 	\begin{center}
 			\begin{dependency}[arc edge, arc angle=80, text only label, label style={above}]
 				\begin{deptext} [row sep=0.4cm, column sep=.1cm]
-					\ ROOT$_0$ \& 昨天$_1$ \& ，$_2$ \& 张三$_3$ \&  将$_4$  \& 一件$_5$ \& 事$_6$ \& 告诉$_7$ \& 李四$_8$  \\
+					\ ROOT \& 昨天 \& ， \& 张三 \&  将  \& 一件 \& 事 \& 告诉 \& 李四  \\
 				\end{deptext}
 				\depedge{1}{8}{\color{black}Root}
 				\depedge{2}{3}{\color{black}mPunc}
@@ -139,8 +139,62 @@
 从上述研究意义出发，本文围绕中文语义依存图分析任务，立足依存分析技术本身，深入探究在非规范文本和多语言文本上的语义依存图分析，最终利用语义依存图帮助其他自然语言处理任务，为语义依存图的应用提供了一种可能性。
 
 \section{研究现状与分析}[Related Work]
+本节介绍了与本文研究的语义依存图分析相关的各领域研究现状。
+具体来说，本文首先介绍语义依存图分析的前身——句法依存分析的研究现状，然后介绍本文的主要研究目标——语义依存分析与句法依存分析的异同及其研究现状。
+接着，针对非规范文本和跨语言语义依存分析任务，本文分别介绍了目前自然语言处理领域对神经网络模型鲁棒性的研究以及跨语言依存分析的方法和研究现状。
+最后，本文介绍了现阶段以依存句法结构为代表的结构化信息在神经网络模型中应用的研究现状。
 
 \subsection{句法依存分析}[Syntactic Dependency Parsing]
+
+句法依存分析是语义依存图分析的前身，相对于刚起步的语义依存图分析，自然语言处理领域的研究者对句法依存分析已经有近二十年的研究。
+得益于语义依存图与传统句法依存树的相似性，依存图的分析方法可以从丰富的句法依存分析工作中借鉴经验。
+因此本文首先介绍传统句法分析领域的主要研究方法。
+
+\begin{figure}[htb]
+	\begin{center}
+			\begin{dependency}[arc edge, arc angle=80, text only label, label style={above}]
+				\begin{deptext} [row sep=0.4cm, column sep=.1cm]
+					\ ROOT \& 张三 \& 吃 \& 苹果 \\
+				\end{deptext}
+				\depedge{1}{3}{\color{black}root}
+				\depedge{3}{2}{\color{black}nsubj}
+				\depedge{3}{4}{\color{black}dobj}
+			\end{dependency}
+			\bicaption[fig:syntax-tree]{}{句法依存树示例}{Fig.$\!$}{Example of syntactic dependency tree}
+	\end{center}
+\end{figure}
+
+如图\ref{fig:syntax-tree}中的例子所示，句法依存分析能够直接描述句子中词与词之间的句法关系，称为依存关系（Dependency Relations）。
+两个词之间的依存关系用一条有向弧表示，其由核心词（head，或称为governer）指向修饰词（dependent，或称为modifier），核心词和修饰词之间的句法关系用弧上的标签表示。
+例如，图\ref{fig:syntax-tree}中，“张三”是“吃”的主语，用标签“nsubj”表示。
+根据定义，一棵句法依存树需要满足以下三个条件：（1）有且仅有一个根节点，该节点是其它所有节点的公共祖先节点；（2）每个词都有且仅有一个父节点；（3）将该依存树按词序排列，句中所有弧可以在句子的一边（上方或下方）表示且不存在交叉弧。
+具体来讲，对于第一个条件，在实际应用中，一般会建立一个虚拟根节点“ROOT”指向句中的这个根节点，他们之间的关系为“root”。
+第二个条件确保的所有的依存弧能组成一个完整的全连接树。
+而第三个条件称为依存树的投射性（projectivity），它对于某些依存分析方法具有重要意义。
+
+目前主流的依存句法分析方法主要可以分为以下两类：
+
+1.基于转移的方法。
+该方法由Yamada等人\cite{yamada-etal-2003-statistical}和Nivre\cite{nivre-2003-efficient}分别于2003年同时最先提出。
+其核心思想是设计基于移进-规约的转移系统，通过一条转移动作序列，逐步生成句子的依存树。
+具体来说，这类算法包括两部分，即转移系统和转移动作分类器。
+转移系统一般由一个保存部分处理的句法依存结构的栈和一个保存尚未处理的词的队列组成。
+转移动作一般包括移进和生成弧，前者将队列中的词移入栈中，后者则负责生成依存弧。
+转移系统根据转移动作而改变，在每一步时，转移动作分类器根据当前的转移系统状态预测下一步的转移动作。
+当队列为空，且栈中只有一棵依存树时，分析过程结束。
+最初，研究者一般使用基于特征工程的统计机器学习方法实现转移动作分类器。
+近年来，随着神经网络在自然语言处理领域的广泛应用，基于神经网络的模型逐渐替代了传统方法来实现此分类器。
+
+2.基于图的方法。
+该方法由McDonald等人\cite{mcdonald-etal-2005-online}与2005年最先提出。
+其核心思想是将依存分析视为在有向全连接图中寻找最大生成树（Maximum Spanning Tree）的问题。
+具体来说，这类方法将一棵句法依存树视为若干子树（subtree）的集合，因而一棵句法依存树的分值就可以分解为这些子树的分值之和。
+这类方法首先计算各个子树的分值，然后使用动态规划算法进行解码，求得使整个句法依存树分值最大的子树组合。
+算法中使用的子树可以由一条弧组成，这时该方法称为一阶算法。
+同理，若基本子树结构由两条弧组成，则称为二阶算法。\cite{carreras-2007-experiments}
+随着阶数的增加，算法的复杂度也逐渐提升。
+另一方面，在计算子树分值时，最初一般采用基于特征工程的统计机器学习方法。
+此后随着神经网络在自然语言处理中的广泛应用，基于神经网络的模型也被用于预测子树分值。
 
 \subsection{语义依存图分析}[Semantic Dependency Graph Parsing]
 
