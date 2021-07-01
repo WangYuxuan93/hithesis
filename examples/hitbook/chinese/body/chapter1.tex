@@ -154,7 +154,7 @@
 	\begin{center}
 			\begin{dependency}[arc edge, arc angle=80, text only label, label style={above}]
 				\begin{deptext} [row sep=0.4cm, column sep=.1cm]
-					\ ROOT \& 张三 \& 吃 \& 苹果 \\
+					\ ROOT$_0$ \& 张三$_1$ \& 吃$_2$ \& 苹果$_3$ \\
 				\end{deptext}
 				\depedge{1}{3}{\color{black}root}
 				\depedge{3}{2}{\color{black}nsubj}
@@ -184,6 +184,34 @@
 当队列为空，且栈中只有一棵依存树时，分析过程结束。
 最初，研究者一般使用基于特征工程的统计机器学习方法实现转移动作分类器。
 近年来，随着神经网络在自然语言处理领域的广泛应用，基于神经网络的模型逐渐替代了传统方法来实现此分类器。
+
+表~\ref{tbl:trans-seq-example}给出了图~\ref{fig:syntax-tree}中对应的句法依存树的转移动作序列，展示了从初始状态经历一系列转移动作最终生成整个句法依存树的过程。
+在表中，句子中的词用其下标数字表示，$\sigma$和$\beta$分别表示转移系统中的栈和队列，$E$表示已经生成的弧的集合。
+该转移序列来自标准弧转移系统（Arc-Standard Transition System），其中定义了移进（Shift）、左弧（Left-Arc）和右弧（Right-Arc）三种转移动作。
+其中移进动作将队列中第一个词移入栈顶。
+而左弧和右弧动作则通过生成栈顶两个词之间的弧对以他们为根的两个子树进行合并，使其中一棵成为另一棵的子树。
+初始状态下，栈中只有一个虚拟根节点，队列中保存句子中的所有词。
+经过一系列转移动作，当队列为空且栈中只有一个以虚拟根节点为根节点的树时，转移序列结束，最终栈中的树就是算法生成的句法依存树。
+
+\begin{table*}[thbp]
+	\centering
+	\small
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{C{3em}L{7em}R{4.5em}L{4em}L{9em}}
+		\hline
+		\bf 状态 & \bf 转移动作 & $\sigma$ & $\beta$ & $E$ \\
+		\hline
+		$0$ & Initialization & $[0]$ & $[1, 2, 3]$ & $\emptyset $ \\
+		$1$ & Shift & $[0, 1]$ & $[2, 3]$ &  \\
+		$2$ & Shift & $[0, 1, 2]$ & $[3]$ &  \\
+		$3$ & Left-Arc & $[0, 2]$ & $[3]$ & $E\ \cup\ \{1\leftarrow \textrm{nsubj}-2\}$ \\
+		$4$ & Shift & $[0, 2, 3]$ & $[]$ &  \\
+		$5$ & Right-Arc & $[0, 2]$ & $[]$ & $E\ \cup\ \{2- \textrm{dobj}\rightarrow3\}$ \\
+        $6$ & Right-Arc & $[0]$ & $[]$ & $E\ \cup\ \{0- \textrm{root}\rightarrow2\}$ \\
+		\hline
+	\end{tabular}
+	\bicaption[tbl:trans-seq-example]{}{图~\ref{fig:syntax-tree}中的句法依存树对应的转移动作序列示例}{Table$\!$}{Transition sequence example of the syntactic dependency tree in Fig.~\ref{fig:syntax-tree}.}
+\end{table*}
 
 2.基于图的方法。
 该方法由McDonald等人\cite{mcdonald-etal-2005-online}与2005年最先提出。
