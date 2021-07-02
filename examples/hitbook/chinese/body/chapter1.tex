@@ -48,7 +48,7 @@
 4. 利用语义依存图帮助其他任务。
 语义依存图分析任务最重要的作用之一是为其他自然语言处理任务提供所需的语义信息。
 然而，目前大多数该领域的研究仍集中在依存分析器的构建上。
-此外，随着基于自注意力网络的上下文相关模型（Bidirectional Encoder Representations from Transformers，简称BERT）\cite{devlin-etal-2018-bert}等预训练模型在自然语言处理各个任务上取得令人瞩目的成绩，句法依存树和语义依存图等人工定义的结构的必要性正面临质疑。
+此外，随着基于变换器的双向编码器表示模型（Bidirectional Encoder Representations from Transformers，简称BERT）\cite{devlin-etal-2018-bert}等预训练模型在自然语言处理各个任务上取得令人瞩目的成绩，句法依存树和语义依存图等人工定义的结构的必要性正面临质疑。
 因此，在预训练语言模型大行其道的背景下，如何利用语义依存图帮助其他自然语言处理任务，也是一个重要的研究课题。
 
 
@@ -84,7 +84,7 @@
 
 
 首先，它不受到句法分析中树结构的限制，因此可以更全面地覆盖句中各个词之间的语义关系。
-图~\ref{fig:sdg0}给出了一个中文语义依存图和句法依存树对比的例子，在句子“早起使人健康”中，“人”同时作为“使”的与事者（Dative, Datv）和“健康”的当事者（Experiencer, Exp），这种关系在有树结构限制的句法标注中难以直接体现，但在语义依存图中则可以直接刻画出来。
+图\ref{fig:sdg0}给出了一个中文语义依存图和句法依存树对比的例子，在句子“早起使人健康”中，“人”同时作为“使”的与事者（Dative, Datv）和“健康”的当事者（Experiencer, Exp），这种关系在有树结构限制的句法标注中难以直接体现，但在语义依存图中则可以直接刻画出来。
 
 其次，语义依存关系比句法依存关系更细化。
 例如，“他吃苹果”和“他很高”中的“他”在句法依存分析中都是主语，但前一个句子中的谓词是他的动作，而后一个句子中的谓词描述的是他的特点，这二者的语义是有明显区别的。
@@ -130,8 +130,8 @@
 
 
 最后，语义分析可以跨越句子的表层结构直接获取深层语义表达的本质，它通过在句子结构中分析实词间的语义关系来直接回答句子中“谁在何时何地对谁做了什么”等问题。
-以图~\ref{fig:sdp0}中的中文句子“张三昨天告诉李四一件事”为例，通过语义依存分析，我们能获知“谁告诉李四一件事？”、“张三告诉谁一件事？”、“张三何时告诉李四一件事？”及“张三告诉李四什么？”等问题的答案。
-另外，图~\ref{fig:sdp1}中的句子“昨天，张三将一个秘密告诉李四。”虽然与图~\ref{fig:sdp0}中的句子“昨天，张三将一件事告诉李四”表述形式不同，但含义相同，因此它们的语义依存结构相同。
+以图\ref{fig:sdp0}中的中文句子“张三昨天告诉李四一件事”为例，通过语义依存分析，我们能获知“谁告诉李四一件事？”、“张三告诉谁一件事？”、“张三何时告诉李四一件事？”及“张三告诉李四什么？”等问题的答案。
+另外，图\ref{fig:sdp1}中的句子“昨天，张三将一个秘密告诉李四。”虽然与图\ref{fig:sdp0}中的句子“昨天，张三将一件事告诉李四”表述形式不同，但含义相同，因此它们的语义依存结构相同。
 因此语义依存分析能为问答系统、信息抽取、信息检索等对语义信息要求较高的任务提供很大帮助。
 %因此语义依存分析可以解决问答系统、信息抽取、信息检索等任务中的“多句一意”情况。
 
@@ -185,13 +185,14 @@
 最初，研究者一般使用基于特征工程的统计机器学习方法实现转移动作分类器。
 近年来，随着神经网络在自然语言处理领域的广泛应用，基于神经网络的模型逐渐替代了传统方法来实现此分类器。
 
-表~\ref{tbl:trans-seq-example}给出了图~\ref{fig:syntax-tree}中对应的句法依存树的转移动作序列，展示了从初始状态经历一系列转移动作最终生成整个句法依存树的过程。
+表\ref{tbl:trans-seq-example}给出了图\ref{fig:syntax-tree}中对应的句法依存树的转移动作序列，展示了从初始状态经历一系列转移动作最终生成整个句法依存树的过程。
 在表中，句子中的词用其下标数字表示，$\sigma$和$\beta$分别表示转移系统中的栈和队列，$E$表示已经生成的弧的集合。
 该转移序列来自标准弧转移系统（Arc-Standard Transition System），其中定义了移进（Shift）、左弧（Left-Arc）和右弧（Right-Arc）三种转移动作。
 其中移进动作将队列中第一个词移入栈顶。
 而左弧和右弧动作则通过生成栈顶两个词之间的弧对以他们为根的两个子树进行合并，使其中一棵成为另一棵的子树。
 初始状态下，栈中只有一个虚拟根节点，队列中保存句子中的所有词。
 经过一系列转移动作，当队列为空且栈中只有一个以虚拟根节点为根节点的树时，转移序列结束，最终栈中的树就是算法生成的句法依存树。
+值得注意的是，该方法要求目标依存树具有投射性。
 
 \begin{table*}[thbp]
 	\centering
@@ -210,7 +211,7 @@
         $6$ & Right-Arc & $[0]$ & $[]$ & $E\ \cup\ \{0- \textrm{root}\rightarrow2\}$ \\
 		\hline
 	\end{tabular}
-	\bicaption[tbl:trans-seq-example]{}{图~\ref{fig:syntax-tree}中的句法依存树对应的转移动作序列示例}{Table$\!$}{Transition sequence example of the syntactic dependency tree in Fig.~\ref{fig:syntax-tree}.}
+	\bicaption[tbl:trans-seq-example]{}{图\ref{fig:syntax-tree}中的句法依存树对应的转移动作序列示例}{Table$\!$}{Transition sequence example of the syntactic dependency tree in Fig.\ref{fig:syntax-tree}.}
 \end{table*}
 
 2.基于图的方法。
@@ -226,11 +227,171 @@
 
 \subsection{语义依存图分析}[Semantic Dependency Graph Parsing]
 
-\subsection{神经网络模型的鲁棒性}[Robustness of Neural Models]
+为了表示比句法结构更复杂的语义结构，自然语言处理领域的研究者在探索中逐渐尝试用表示能力更强的图结构来代替传统的树结构。
+根据语义图中的节点与句中词之间的关系，现有的语义图语料可以分为锚定（anchored）的和非锚定（unanchored）的两类。
+第一类锚定的语义图特点为语义图中每个节点都与句子中的词一一对应，因此可以认为语义关系是直接标注在句中词与词之间的。
+而第二类非锚定的语义图特点为语义图中的节点与句子中的词没有明确对应关系。
+
+非锚定的语义图中最具代表性和影响力的是抽象语义表示（Abstract Meaning Representation，简称为AMR）。\cite{banarescu-etal-2013-abstract}
+由于其语义图中的节点与句子中的词没有严格的对应关系，AMR具有较强的抽象能力，在获取不同表达形式的句子的相同语义内核方面具有一定优势。
+但语义图节点与句中词关系的去相关化，也为AMR的分析和应用带来了巨大的挑战。
+
+锚定的语义图中最具代表性的则是语义依存图，也是本文的主要研究内容。
+相对于非锚定的语义图，语义依存图中的语义关系直接标注在句中的词之间，这大大降低了语义依存图的理解难度。
+同时，得益于语义依存图与传统的句法依存树在结构上的相似性，无论是语义依存图的分析方法还是应用途径，都能从句法依存分析领域的大量研究中获取经验和灵感。
+针对本文主要研究内容，本节主要介绍语义依存图分析领域的研究现状。
+在结构上，语义依存图与句法依存树的主要区别在于句法依存树中每个词有且只能有一个父节点，而语义依存图中允许一个词拥有多个父节点。
+此外，多父节点词的出现，也破坏了传统句法依存树的投射结构。
+也就是说在语义依存图中，存在投射句法依存树中没有的交叉弧，这使得句法分析中的很多方法无法直接应用到语义依存图分析中。
+因此，现有的语义依存图分析方法基本延续了句法依存分析中的基于转移的和基于图的两类方法，并将研究重点集中在如何解决上述的多父节点词问题上。
+
+针对基于转移的方法，Du等人对句法依存树的转移系统进行修改\cite{du-etal-2014-peking}，增加了交换（swap）动作，其作用是交换栈顶和队列中的第一个词。
+这一动作解决了语义依存图中存在交叉弧的问题。
+此外，他们还修改了生成弧的转移动作，在生成两个词之间的弧之后，不再从转移系统中删除其中的子节点，而是增加了一个额外的弹栈（pop）动作用于删除已经找到所有父节点和子节点的词。
+这一改动使得他们的转移系统能为一个词生成多个父节点。
+通过对转移系统的改动，该方法成功实现了对语义依存图的分析。
+大部分基于转移的依存图分析方法\cite{sagae-tsujii-2008-shift,titov-etal-2009-online}也与该方法类似，都将重点放在对转移系统的修改上，而在另一个重要模块——转移动作分类器上沿用了传统的基于特征工程的统计机器学习方法。
+
+针对基于图的方法，Almeida等人在句法依存树的二阶算法的子树结构中加入依存图特有的子树结构。\cite{martins-almeida-2014-priberam}
+例如加入由一个词与其两个父节点之间的两条弧组成的子树。
+通过这些依存图特有的子树结构，他们的算法将传统基于图的依存树分析算法无法覆盖的依存图子结构纳入考虑中，然后将依存图解码问题视为全局优化问题，采用对偶分解（dual decomposition）算法对其进行求解。
+
+\subsection{非规范文本依存分析}[Dependency Parsing on Informal Texts]
+
+近年来，神经网络模型在语音识别、计算机视觉和自然语言处理等领域取得了重大成功。
+然而，计算机视觉领域的研究者首先发现，在神经网络模型的输入中加入微小的扰动，会使其产生误判，从而导致性能大大下降。\cite{akhtar-etal-2018-threat}
+这种扰动在计算机视觉领域一般是指对输入图像加入噪点。
+这种噪点对于人类来说几乎是难以察觉的，但却能显著影响神经网络模型的判断。
+这一发现加强了各领域的研究者对神经网络模型鲁棒性的重视程度，也引发了一系列相关研究。
+随后，自然语言处理领域的研究者也开展了对神经网络鲁棒性的研究。\cite{zhang-etal-2020-adversarial}
+在自然语言处理领域，输入的扰动则变为了对输入文本的修改，而这种修改也需要使得人类难以察觉。
+从另一个角度来说，自然语言处理领域的模型鲁棒性研究，也可以理解为探索与传统的由规范文本组成的数据集相对应的非规范文本上的模型的表现。
+本节首先介绍自然语言处理领域的神经网络模型，然后介绍该领域内研究者对神经网络模型在非规范文本上的多个任务的鲁棒性研究现状。
+
+\subsubsection{自然语言处理领域的神经网络模型}
+
+在自然语言处理领域中，神经网络模型的一个重要特征就是使用了连续、低维、稠密的词向量（word embedding）代替了传统统计机器学习方法中的离散、高维的符号表示。
+因此本节从词向量的角度分别介绍自然语言处理领域中广泛使用的两类神经网络模型：基于固定词向量的模型和基于上下文相关词向量的模型。
+
+1.基于固定词向量的模型。
+在神经网络模型被应用于自然语言处理领域的早期阶段，固定词向量因为有效解决了离散特征表示维度过高造成的“维度灾难”问题（Curse of Dimensionality）而占有重要地位。
+与传统方法中离散特征表示需要领域专家设计特征模板不同，固定词向量一般是通过基于神经网络的特征学习（Representation Learning）获取的。
+固定词向量中最具代表性的是Mikolov等人于2013年提出的Word2vec算法\cite{mikolov-etal-2013-distributed}。
+其中包括两个模型，分别是连续词袋模型（Continuous Bag-of-Words Model，简称CBOW）和跳跃文法模型（Skip-gram Model），如图\ref{fig:word2vec}所示。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/word2vec.pdf}
+    \bicaption[fig:word2vec]{}{连续词袋模型（左）和跳跃文法模型（右）}{Fig.$\!$}{CBOW model (left) and Skip-gram model (right)}
+\end{figure}
+
+CBOW模型的核心思想是用一个词的上下文预测该词。
+形式化地，给定一个目标词$w_t$及其上下文$C_t=\{w_{t-n},\dots,w_{t-1},w_{t+1},\dots,w_{t+n}\}$。
+对于每个词$w_j$，模型中分别有输入词向量$\bm{e}(w_j)$和输出词向量$\bm{e}'(w_j)$作为其表示，其中输入词向量$\bm{e}(w_j)$是模型要学习的词向量。
+该模型首先计算$w_t$上下文的词向量平均值$\bm{e}(C_t)=\frac{1}{|C_t|}\sum_{w_j\in C_t}\bm{e}(w_j)$，然后计算词$w_t$出现在上下文$C_t$中的概率：
+\begin{equation}
+    P(w_t|C_t)=\frac{\exp(\bm{e'}(w_t)^{\top}\bm{e}(C_t))}{\sum_{w'\in \mathbb{V}}\exp(\bm{e'}(w')^{\top}\bm{e}(C_t))}
+\end{equation}
+其中$\mathbb{V}$表示模型中的词表，而模型最终优化目标为最大化整个训练数据集上的平均对数概率：
+\begin{equation}
+    \frac{1}{T}\sum_{t=1}^{T}\log P(w_t|C_t)
+\end{equation}
+其中$T$表示训练集中的样本个数。
+
+相对的，Skip-gram模型则用中心词$w_t$预测上下文$C$中的每个词$w_j$：
+\begin{equation}
+    P(w_j|w_t)=\frac{\exp(\bm{e'}(w_j)^{\top}\bm{e}(w_t))}{\sum_{w'\in \mathbb{V}}\exp(\bm{e'}(w')^{\top}\bm{e}(w_t))}
+\end{equation}
+其最终优化目标为最大化整个训练集上的平均对数概率：
+\begin{equation}
+    \frac{1}{T}\sum_{t=1}^{T} \sum_{w_j\in C_t} \log P(w_j|w_t)
+\end{equation}
+
+以Word2vec为代表的的固定词向量学习方法，为自然语言处理领域提供了新的词表示方式，在神经网络模型中发挥了重要作用，有效地提高了大量自然语言处理任务上的性能。
+
+2.基于上下文相关词向量的模型。
+虽然固定词向量有效解决了维度灾难问题，但其是建立在每个词只有一个表示向量的假设下的。
+然而在自然语言中存在大量的一词多义现象，一个单独的词向量往往无法很好地表示多义词的所有含义。
+为解决这一问题，研究者逐渐开始使用上下文来动态的获取词的表示向量。
+这一思想起源于自然语言处理中的语言模型，即根据前文预测下一个词。
+Bengio等人早在2005年就提出了一种利用有限窗口中的\cite{bengio-etal-2003-neural}前文预测下一个词的语言模型。
+从后来的Word2vec算法中也能看到这一思想的影子。
+但在很长一段时间中，研究者都只使用这种方法获取的固定的静态词向量，然后用于其他任务。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/elmo.pdf}
+    \bicaption[fig:elmo]{}{ELMo模型结构}{Fig.$\!$}{ELMo model architecture}
+\end{figure}
+
+直到Peters等人于2018年提出了基于语言模型的上下文相关词向量（Embeddings from Language Models，简称ELMo）\cite{peters-etal-2018-deep}。
+如图\ref{fig:elmo}所示，该方法使用基于双向长短时记忆网络（Long-Short Memory Network，简称LSTM）的语言模型为文本中的每个词生成基于上下文的动态词向量，通过这种方式，同样的词在不同上下文中会获得不同的向量表示，从而有效缓解了一词多义问题。
+ELMo的学习目标还是语言模型，即根据上文预测下一个词，但其中使用了从左到右和从右到左两个方向的语言模型，从而使最终的动态词向量能同时获取上下文的信息。
+具体来说，对于一个句子$\{w_1,\dots,w_n\}$，ELMo的最终优化目标为两个方向的语言模型的对数似然之和：
+\begin{equation}
+    L= \log(P(w_i|w_1,\dots,w_{i-1})) + \log(P(w_i|w_{i+1},\dots,w_{n}))
+\end{equation}
+
+值得注意的是，为了缓解不在词表中的词的问题，ELMo采用了字向量代替词向量作为输入，然后用基于字的卷积神经网络（Convolutional Neural Network，简称CNN）获取词的上下文无关表示。
+接着将其输入到多层双向LSTM中，获取上下文相关的表示，以从左到右的语言模型为例，第$i$个词在第$k$层LSTM的表示为：
+\begin{equation}
+    \overleftarrow{\bm{h}}_i^{(k)} = \overleftarrow{\textrm{LSTM}}^{(k)}(\overleftarrow{\bm{h}}_1^{(k-1)},\dots,\overleftarrow{\bm{h}}_i^{(k-1)})
+\end{equation}
+其中$\overleftarrow{\bm{h}}_i^{(0)}=\bm{v}_i$为上述用CNN获取的上下文无关词向量。
+假设LSTM共有$L$层，则最终为第$i$个词输出的上下文相关词向量为$L$层隐层状态的加权平均：
+\begin{equation}
+    \textrm{ELMo}_i = \gamma \sum_{k=0}^{L}s_k \cdot (\overleftarrow{\bm{h}}_i^{(k)}\oplus\overrightarrow{\bm{h}}_i^{(k)})
+\end{equation}
+其中$\gamma$为可学习参数，可以在应用在其他任务时动态的学习。
+
+ELMo在命名实体识别\cite{tjong-kim-sang-de-meulder-2003-introduction}、情感分析\cite{socher-etal-2013-recursive}、文本蕴涵\cite{bowman-etal-2015-large}、阅读理解\cite{rajpurkar-etal-2016-squad}、语义角色标注\cite{pradhan-etal-2013-towards}和共指消解\cite{pradhan-etal-2012-conll}等六个数据集上取得了当时最优结果，有效证明了上下文相关词向量的重要性，也引起了许多研究者对此的兴趣。
+
+紧随ELMo的脚步，Radford等人在2018年提出使用单向Transformer代替LSTM对语言模型进行建模，称为生成式预训练模型（Generative Pre-Training，简称GPT）\cite{radford-etal-2018-improving}。
+除了上述区别外，GPT相比ELMo的另一特点是在目标任务上对预训练的语言模型进行精调参数（fine tuning）。
+这种方法进一步提升了模型的性能，并被很多后续的工作所采用。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/bert.pdf}
+    \bicaption[fig:bert]{}{BERT模型结构}{Fig.$\!$}{BERT model architecture}
+\end{figure}
+
+在GPT和ELMo的基础上，Devlin等人于2018年提出了基于变换器的双向编码器表示模型（Bidirectional Encoder Representations from Transformers，简称BERT）\cite{devlin-etal-2018-bert}，同时建模目标词的上下文。
+他们提出遮盖语言模型（masked language model）代替传统单向语言模型作为学习目标，通过将目标词遮盖然后用其上下文预测该词实现了同时利用左右两个方向的上下文信息。
+此外，他们还提出了预测下一个句子任务（next sentence prediction），将两个句子连接起来并预测第二个句子是否是第一个的后续句子。
+与GPT相同，由于两个学习目标都不需要标注信息，BERT也是在大规模的未标注文本上进行预训练，然后再在目标任务上进行精调参数。
+如图\ref{fig:bert}所示，为了缓解不在词表中的词的问题，BERT用词片段向量代替了词向量。
+此外，与有向的LSTM不同，BERT采用的Transformer结构是全连接的，无法有效表示文本中词的位置信息。
+为解决这一问题，BERT在输入向量中加入了位置向量用来表示输入的每个词片段的位置。
+最后，由于BERT的训练过程中要将两个句子拼接起来，其在输入中额外加入了段向量用来区分当前词是属于第一句还是第二句的。
+
+BERT在11项自然语言处理任务上取得了令人瞩目的大幅度性能提升，并以其强大的表示能力吸引了众多研究者的目光，开启了自然语言处理领域的预训练时代。
+在BERT出现之前，自然语言处理领域中的各个任务一般都有针对它们的特点专门设计的各不相同的神经网络。
+随着BERT之后越来越多预训练模型的出现，其渐成为了大部分任务的通用解决方法，研究者们逐渐趋向于使用大规模无标注数据在某些人工定义的任务上先对模型进行预训练，然后再针对目标任务进行精调参数。
+
+\subsubsection{非规范文本上神经网络模型的鲁棒性}
+
+尽管神经网络模型在自然语言处理领域取得了巨大的成功，
 
 \subsection{跨语言依存分析}[Cross-Lingual Dependency Parsing]
 
+% 数据库 + 例子
+
+% 跨语言词向量 （固定+动态）
+
+% MTL
+
+% data augmentation
+
 \subsection{结构化信息在神经网络模型中的应用}[Application of Structural Information in Neural Models]
+
+% BERT
+
+% probing
+
+% word-level infusion
+
+% SRL为例
 
 
 \section{本文的研究内容及章节安排}[Contents and Chapter Arrangement of the Thesis]
@@ -238,15 +399,14 @@
 本文围绕中文语义依存图分析开展一系列研究工作。
 从语义依存图分析方法本身入手，系统深入地探究了非规范文本和多语言文本上的语义依存图分析，并最终利用语义依存图有效帮助了其他自然语言处理任务。
 在这几项研究内容中，语义依存图分析方法是首先需要解决的问题，也是支撑其他任务的基石。
-在此基础上，我们探究了在不同场景下的语义依存图分析。
+在此基础上，我们探究了在非规范文本和多语言文本上的语义依存图分析，使语义依存图分析技术能适用于更多场景。
 最后，我们研究了利用语义依存图帮助其他自然语言处理任务的方法。
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.95\textwidth]{figures/section_relation.pdf}
+    \includegraphics[width=0.95\textwidth]{figures/section-relation.pdf}
     %\caption{论文总体框架}[Structure of the thesis]
     \bicaption[fig:section-relation]{}{论文总体框架}{Fig.$\!$}{Structure of the thesis}
-    \label{}
 \end{figure}
 
 论文结构框架如图\ref{fig:section-relation}所示，具体来说，本文共包含5章，各章内容组织如下：
