@@ -4,20 +4,60 @@
 
 \section{引言}[Introduction]
 
+在过去的二十几年中，自然语言处理领域涌现出了大量的关于树结构的句法分析的研究工作\cite{eisner-1996-three, nivre-2004-incrementality, mcdonald-etal-2006-online, nivre-2009-non, zhang-nivre-2011-transition}。
+近年来，在神经网络模型的帮助下，句法依存分析的准确率取得了显著的提升\cite{chen-manning-2014-fast,weiss-etal-2015-structured, andor-etal-2016-globally}。
+然而，当表示的目标从句法结构变为深层语义结构时，树结构的不足之处就展现了出来。
+从语义层面上来说，句子中的一个词可以同时作为多个谓词（predicate）的论元（argument）。
+为了刻画这种语义关系，有研究者使用了有向无环图（a directed acyclic graph，简称DAG）结构，其中的节点允许有多条入弧。
+Oepen等人\cite{oepen-etal-2015-semeval}于2015年公布了Broad-Coverage Semantic Dependency Graph语料库，包含了英文、捷克语和中文上的三种语义依存图标注。
+而Che等人\cite{che-etal-2016-semeval}于2016年公布了中文语义依存图语料库。
+本文重点研究的就是其中的中文语义依存图的分析技术及应用。
+
+正如第\ref{sec:sdp}节所介绍，图结构的引入在提升语义表示能力的同时，也因其中每个词父节点数量的不确定性给依存图分析带来了巨大的挑战。
+虽然语义依存图的分析方法可以从其前身——句法依存树分析的工作中寻找灵感，但如何生成多父节点词，是所有的依存图分析方法都无法回避的，也是依存图分析中的核心问题。
+除此之外，此前的语义依存图分析模型，大部分仍然在使用传统的基于特征工程的统计机器学习方法。
+然而自从Chen等人\cite{chen-manning-2014-fast}于2014年首次将神经网络模型引入基于转移的句法依存分析器中，神经网络模型已经在依存分析领域证明了其强大的特征表示能力。
+但该方法仍然使用了人工设计的特征，没有完全避免需要专家知识的特征工程。
+
+总的来说，想要实现高效、准确的语义依存图分析模型需要面临两个挑战：
+
+1.如何解决多父节点词的问题？
+
+2.如何更高效、准确地实现分析模型的学习？
+
+针对上述第一个问题，本章采用了基于转移的分析方法，设计了一套用于生成依存图的转移系统，使其在不需要预处理和后处理的情况下能够直接根据输入的句子完整地生成其对应的语义依存图。
+
+针对上述第二个问题，本章采用了基于栈-长短时记忆网络（Stack-LSTM）的模型，用LSTM分别获取转移系统中各个部分的上下文相关表示向量，组成当前转移状态的表示向量，并用其预测下一个转移动作。
+特别的，本章为转移系统中重要的队列和已经生成的子图分别使用了双向LSTM相减模块和Tree-LSTM模块来更好地获取其表示。
+
+本章在前文介绍的中文和英文的语义依存图语料库上分别测试了上述模型，实验结果表明，本章提出的语义依存图分析方法在此前方法的基础上取得了显著的性能提升。
+
 \section{背景与相关工作}[Related Work]
 
-\section{基于转移的语义依存图分析方法}[Transition-Based Semantic Dependency Graph Parsing]
+基于转移的依存分析主要由转移系统和转移动作分类器两部分组成。
+其中转移系统包括了由列表、栈等结构组成的环境和一系列预定义的对环境进行改变的转移动作。
+包括列表、栈等结构在内的所有环境在某一时间节点的情况称为转移状态。
+转移动作在执行时不仅修改转移状态，也会同时生成词之间的依存弧，而目标依存结构就是通过一系列的转移动作生成的。
+本文第\ref{sec:syntactic-dependency-parsing}节已经介绍了标准弧转移系统并简要介绍了基于转移的分析模型中的转移动作分类器。
+本节将重点介绍与本章研究内容密切相关的贪心弧转移系统（Arc-Eager Transition System）\cite{choi-palmer-2011-getting,choi-mccallum-2013-transition}和Stack-LSTM模型结构\cite{dyer-etal-2015-transition}。
 
-为了设计适用于依存图结构的分析器，我们选择了基于转移的分析方法作为突破口。
-这类方法通过执行一系列从初始转移状态到终止转移状态的移进、规约等转移动作，实现目标结构的生成。这类方法由两个重要部分组成，一是转移系统，它定义了存放句中词的结构、转移动作集合以及转移动作执行的规则；二是分类器，它以当前转移状态为依据，预测出下一步要执行的转移动作。基于转移的分析方法的核心就是训练一个好的分类器，使得当我们按照它预测的动作产生语义依存图时，与正确的语义依存图尽可能相似。接下来分别介绍我们实现的用于分析语义依存图的转移系统和分类器。
+Choi等人\cite{choi-palmer-2011-getting}于2011年提出了一种贪心弧转移算法。
+从转移动作上来说，该算法与标准弧转移算法的主要区别是标准弧转移算法生成的是栈顶的两个词之间的依存关系，而贪心弧转移算法生成的是栈顶词和列表中第一个词之间的依存关系。
+这种生成弧的顺序无法保证一个词找到其父节点时其所有子节点都已经提前找到，为了解决这一问题，该算法里又增加了规约（Reduce）和跳过（PASS）动作。
+其中规约动作用于处理所有入弧和出弧都已经找到的节点，将其从转移状态中删除。
+有了规约动作，原来生成弧的动作，即左弧（Left）和右弧（Right）将不再承担删除子节点的任务。
+而跳过动作则暂时将栈顶词弹出，从而允许列表中的词与栈中其他词之间生成弧。
+而为了保存栈顶弹出的词，该算法的转移状态中在一般的栈和列表的基础上额外增加了一个双向队列，专门保存这些被弹出的词，等到下一个移进动作时一起再移入栈中。
 
-\subsection{转移系统}[Transition System]
-
-由于语义依存图具有非投射性（弧之间存在交叉），在设计转移系统时，我们参考了Choi等人提出的用于分析非投射依存树的转移系统，\cite{choi-palmer:2011:ACL-HLT2011,choi-mccallum:2013:ACL2013}并对其做了改进，使其能够直接分析语义依存图。其主要思想是在找到一个词的父节点之后，不再马上将其从转移系统中删除（由于在树结构中，一个词只有一个父节点，因此在分析依存树时，一旦找到了一个词的父节点，就会立即将其从转移系统中删除），而是仍然将其保存在系统中，这样未来这个词就能找到其它的父节点。
+从另一个角度来说，这种转移动作的设计实际上是通过将生成弧的动作与删除词的动作分离来解决贪心弧转移算法的劣势，即生成弧的时候无法保证该弧指向的子节点的所有子节点都已经找到。
+然而这种转移动作的分离又引入了一个新的问题。
+基于转移的依存分析方法中，转移动作分类器通过当前转移状态来预测下一个要执行的转移动作，这就要求每个转移动作执行之后会对转移状态进行明显的修改。
+然而由于生成弧的动作不再删除子节点，其对转移状态的改变很小（只是在已生成的子图中加了一条弧），难以被分类器察觉。
+为了解决这一问题，Choi等人对生成弧的动作（包括左弧、右弧和不生成弧）和修改转移状态的动作（移进、规约等）进行了组合，确保每个生成弧的动作都会对转移状态进行修改。
 
 \begin{table}[htbp]
 	\centering
-	\small
+	%\small
 	\renewcommand{\arraystretch}{1.2}
 	\begin{tabular}{l|ll}
 		\hline
@@ -34,9 +74,66 @@
 		No-Pass &\ \ $([\sigma|i],\,\delta,\,[j|\beta],\,E)$ & $\Rightarrow (\sigma,\,[i|\delta]	,\,[j|\beta],\,E)$\\
 		\hline
 	\end{tabular}
-	\caption{List-based Arc-eager转移系统中的转移动作集合}
+	\bicaption[tbl:choi-transition-actions]{}{List-based Arc-eager转移算法中的转移动作集合}{Table$\!$}{Transition actions in List-based Arc-eager transition algorithm.}
 	\label{tbl:actions}
 \end{table}
+
+他们将该算法命名为基于列表的贪心弧（List-based Arc-eager）转移算法，其中定义的转移动作如表\ref{tbl:choi-transition-actions}所示。
+表中$\sigma$，$\delta$和$\beta$分别代表上文介绍的转移系统中的栈、双向队列和列表。
+而$E$表示算法生成的所有依存弧集合。
+
+值得注意的是，将生成弧的动作和删除词的动作进行分离的思想，虽然在该工作中是为了弥补贪心弧转移算法的劣势，但对于语义依存图的生成也有重要意义。
+利用这种思想可以设计出适用于依存图生成的转移系统，在为句中词找到一个父节点的时候不立即将其从转移状态中删除，而是继续寻找它的其他父节点，直到一个词的所有父节点都已找到再对其进行规约。
+因此，本章选择在List-based Arc-eager转移算法的基础上设计语义依存图的转移算法。
+
+% stack-lstm
+Chen等人\cite{chen-manning-2014-fast}于2014年首次将多层感知器（
+Multi-Layer Perceptron，简称MLP）引入基于转移的依存分析器，利用其强大的表示能力显著提高了句法依存分析的性能。
+但该方法仍然受限于传统特征工程的思想，使用了固定位置的隐层表示作为转移状态的表示，用于预测下一个转移动作。
+尽管如此，该方法开启了基于神经网络模型的句法依存分析的大门，启发了此后很多的相关工作。
+
+Dyer等人\cite{dyer-etal-2015-transition}于2015年提出了使用Stack-LSTM代替MLP，从而全自动地获取转移状态表示的方法。
+具体来说，假设$\bm{x}_t$是$t$时刻的输入向量，普通的LSTM在$t$时刻首先计算控制信息的输入门$\bm{i}_t$（Input Gate）、遗忘门$\bm{f}_t$（Forget Gate）和保存信息的记忆单元$\bm{c}_t$（Memory Cell）：
+\begin{equation}
+    \bm{i}_t = \sigma(\bm{W}_{ix}\bm{x}_t + \bm{W}_{ih}\bm{h}_{t-1} + \bm{W}_{ic}\bm{c}_{t-1} + \bm{b}_i)
+\end{equation}
+\begin{equation}
+    \bm{f}_t = \sigma(\bm{W}_{fx}\bm{x}_t + \bm{W}_{fh}\bm{h}_{t-1} + \bm{W}_{fc}\bm{c}_{t-1} + \bm{b}_f)
+\end{equation}
+\begin{equation}
+    \bm{c}_t = \bm{f}_{t}\odot\bm{c}_{t-1} + \bm{i}_{t}\odot \tanh(\bm{W}_{cx}\bm{x}_{t} + \bm{W}_{ch}\bm{h}_{t-1} + \bm{b}_c)
+\end{equation}
+其中$\odot$表示逐点乘积（Hadamard product），$\sigma$表示非线性变换函数，例如sigmoid或tanh。
+之后计算控制LSTM输出的输出门$\bm{o}_t$（Output Gate）并用其计算时刻$t$的隐层输出$\bm{h}_t$：
+\begin{equation}
+    \bm{o}_t = \sigma(\bm{W}_{ox}\bm{x}_t + \bm{W}_{oh}\bm{h}_{t-1} + \bm{W}_{oc}\bm{c}_{t-1} + \bm{b}_o)
+\end{equation}
+\begin{equation}
+    \bm{h}_t = \bm{f}_{t}\odot\tanh(\bm{c}_{t})
+\end{equation}
+通过上述三种门的控制和记忆单元，LSTM能够更新、储存和重置较长序列的信息，从而解决长距离依赖问题。
+
+LSTM的特性使其很适合用于抽取基于转移的依存分析器中转移系统各个部分的信息。
+然而普通的LSTM只能建模从左到右或从右到左的序列。
+而在基于转移的依存分析中，转移系统中的栈中的词是不断变化的，这种变化不仅有单方向的增加，也有删除。
+为了解决该问题，Dyer等人提出了Stack-LSTM模型，在普通LSTM中加入一个栈指针，永远指向当前栈顶词。
+在从栈中删除栈顶词时，指针指向新的栈顶词。
+在向栈中移入新的词时，由栈指针指向的那个词提供LSTM计算所需的$\bm{c}_{t-1}$和$\bm{h}_{t-1}$。
+通过这种方式，他们将LSTM成功应用于基于转移的依存分析，实现了全自动的获取当前转移状态的表示，而不需要任何人工定义特征。
+
+本章的提出的语义依存图分析器建立在Stack-LSTM的基础上，并提出了两种神经网络模块，用于更好地获取转移系统中队列和已经生成的子图的表示。
+
+
+\section{基于转移的语义依存图分析方法}[Transition-Based Semantic Dependency Graph Parsing]
+
+为了设计适用于依存图结构的分析器，我们选择了基于转移的分析方法作为突破口。
+这类方法通过执行一系列从初始转移状态到终止转移状态的移进、规约等转移动作，实现目标结构的生成。这类方法由两个重要部分组成，一是转移系统，它定义了存放句中词的结构、转移动作集合以及转移动作执行的规则；二是分类器，它以当前转移状态为依据，预测出下一步要执行的转移动作。基于转移的分析方法的核心就是训练一个好的分类器，使得当我们按照它预测的动作产生语义依存图时，与正确的语义依存图尽可能相似。接下来分别介绍我们实现的用于分析语义依存图的转移系统和分类器。
+
+\subsection{转移系统}[Transition System]
+
+由于语义依存图具有非投射性（弧之间存在交叉），在设计转移系统时，我们参考了Choi等人提出的用于分析非投射依存树的转移系统，\cite{choi-palmer:2011:ACL-HLT2011,choi-mccallum:2013:ACL2013}并对其做了改进，使其能够直接分析语义依存图。其主要思想是在找到一个词的父节点之后，不再马上将其从转移系统中删除（由于在树结构中，一个词只有一个父节点，因此在分析依存树时，一旦找到了一个词的父节点，就会立即将其从转移系统中删除），而是仍然将其保存在系统中，这样未来这个词就能找到其它的父节点。
+
+
 
 
 \begin{table}[h]
@@ -154,7 +251,7 @@ Dyer等人提出了Stack LSTM结构，\cite{dyer-EtAl:2015:ACL-IJCNLP}用几个�
 
 \begin{figure}[hbtp]
 	\centering
-	\includegraphics[width=130mm]{figures/bs-it.jpg}
+	\includegraphics[width=0.9\textwidth]{figures/bs-it.jpg}
 	\caption{BS-IT系统模型整体结构图}
 	\label{fig:bsit}
 \end{figure}
@@ -163,7 +260,7 @@ Dyer等人的模型中简单地使用从右向左的单向LSTM的最后一个隐
 
 \begin{figure}[hbtp]
 	\centering
-	\includegraphics[width=80mm]{figures/bs.jpg}
+	\includegraphics[width=0.7\textwidth]{figures/bs.jpg}
 	\caption{Bi-LSTM Subtraction模块结构图}
 	\label{fig:bs}
 \end{figure}
@@ -193,7 +290,7 @@ Dyer等人的模型中使用基于依存的递归神经网络（RecNN）\cite{so
 
 \begin{figure}[hbtp]
 	\centering
-	\includegraphics[width=80mm]{figures/it.jpg}
+	\includegraphics[width=0.8\textwidth]{figures/it.jpg}
 	\caption{Incremental Tree-LSTM模块结构图}
 	\label{fig:it}
 \end{figure}
