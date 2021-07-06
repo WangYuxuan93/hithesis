@@ -196,13 +196,12 @@
 值得注意的是，该方法要求目标依存树具有投射性。
 
 \begin{table*}[thbp]
-	\centering
-	\small
-	\renewcommand{\arraystretch}{1.2}
+    \bicaption[tbl:trans-seq-example]{}{图\ref{fig:syntax-tree}中的句法依存树对应的转移动作序列示例}{Table$\!$}{Transition sequence example of the syntactic dependency tree in Fig.\ref{fig:syntax-tree}.}
+	\vspace{0.5em}\centering\wuhao
 	\begin{tabular}{C{3em}L{7em}R{4.5em}L{4em}L{9em}}
-		\hline
-		\bf 状态 & \bf 转移动作 & $\sigma$ & $\beta$ & $E$ \\
-		\hline
+		\toprule[1.5pt]
+		状态 & 转移动作 & $\sigma$ & $\beta$ & $E$ \\
+		\midrule[1pt]
 		$0$ & Initialization & $[0]$ & $[1, 2, 3]$ & $\emptyset $ \\
 		$1$ & Shift & $[0, 1]$ & $[2, 3]$ &  \\
 		$2$ & Shift & $[0, 1, 2]$ & $[3]$ &  \\
@@ -210,9 +209,8 @@
 		$4$ & Shift & $[0, 2, 3]$ & $[]$ &  \\
 		$5$ & Right-Arc & $[0, 2]$ & $[]$ & $E\ \cup\ \{2- \textrm{dobj}\rightarrow3\}$ \\
         $6$ & Right-Arc & $[0]$ & $[]$ & $E\ \cup\ \{0- \textrm{root}\rightarrow2\}$ \\
-		\hline
+		\bottomrule[1.5pt]
 	\end{tabular}
-	\bicaption[tbl:trans-seq-example]{}{图\ref{fig:syntax-tree}中的句法依存树对应的转移动作序列示例}{Table$\!$}{Transition sequence example of the syntactic dependency tree in Fig.\ref{fig:syntax-tree}.}
 \end{table*}
 
 2.基于图的方法。
