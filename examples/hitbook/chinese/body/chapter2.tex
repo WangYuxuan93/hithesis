@@ -307,7 +307,7 @@ Left-$*$和Right-$*$分别表示以Left和Right开头的动作，$*$-Reduce和$*
 其中$\bm{g}_z$是用于表示转移动作$z$的列向量，而$q_z$是其偏置项，集合$A(\sigma,\beta)$是在当前状态下可以执行的转移动作。
 
 为了获取对转移状态更全面的表示，本章在该结构的基础上提出了2个有效的神经网络模块，即双向LSTM相减模块（Bi-LSTM Subtraction，简称BS）和递增的Tree-LSTM模块（Incremental Tree-LSTM，简称IT），分别对转移过程中的列表和子图进行建模，最终的依存图分析系统简称为BS-IT系统。
-图\ref{fig:bsit}给出了本章提出的模型的整体结构图。接下来分别对两个模块进行具体介绍。
+图\ref{fig:bs-it}给出了本章提出的模型的整体结构图。接下来分别对两个模块进行具体介绍。
 
 \begin{figure}[hbtp]
 	\centering
