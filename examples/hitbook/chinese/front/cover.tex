@@ -79,23 +79,23 @@
 
 本文围绕中文语义依存图分析技术及其应用，开展了以下四个方面的研究：
 
-\textbf{1.基于深度学习的语义依存图分析：}  
+1.\textbf{基于深度学习的语义依存图分析}。
 针对语义依存图的图结构特性，本文利用基于转移的分析方法，设计了适用于图结构的转移系统。
 同时提出一种基于栈-长短时记忆网络的分类器，利用当前转移状态预测下一步转移动作，从而实现了对语义依存图的自动分析。
 %使用了两种新的神经网络模块（Incremental Tree-LSTM和Bi-LSTM Subtraction）对转移系统中十分重要的子图和缓存部分进行建模，
 
-\textbf{2.非规范文本语义依存图分析：}
+2.\textbf{非规范文本语义依存图分析}。
 尽管基于深度学习的依存分析器在规范的文本组成的语料库上获得了较好的性能，其在非规范文本上的性能却有显著下降。
 针对这一问题，本文设计了对抗样本攻击算法用于生成使分析器产生误判的非规范文本，并利用此算法对基于深度学习的依存分析器的鲁棒性进行深入探究。
 本文进一步提出模型融合和对抗样本训练方法，有效提升了基于深度学习的依存分析器的鲁棒性。
 %我们通过设计攻击算法生成对抗样本的方法，针对基于神经网络的依存分析器中的这一现象进行研究，分析了该任务中对抗样本的特性，并提出了增强分析器鲁棒性的方法。
 
-\textbf{3.跨语言语义依存图分析：}
+3.\textbf{跨语言语义依存图分析}。
 目前语义依存图分析的研究主要集中在少数几种语言上，而对于世界上绝大部分语言，语义依存图标注难以获取，且人工标注代价高。
 针对这一问题，本文提出基于标签转换和图神经网络的自动标注转化方法，通过构建伪数据、训练神经网络转化器，将大量现有的多语言依存句法标注转化为语义依存图标注。
 进而利用这些自动转化的依存图标注和跨语言上下文相关词向量训练分析器，实现对资源稀缺语言的语义依存图分析。
 
-\textbf{4.基于图神经网络的语义依存图应用：}
+4.\textbf{基于图神经网络的语义依存图应用}。
 目前几乎所有语义依存图相关研究都集中在数据集构建和自动分析器设计上。
 但作为一条理解自然语言的途径，语义依存图分析的最终目的是在语义层面帮助其他任务。
 本文提出一个基于图神经网络的模型，将语义依存图中的信息有效融入预训练模型中，并将此强化的预训练模型应用于其他任务中，有效提升了其性能。
@@ -123,23 +123,23 @@ As an emerging task, both the parsing approach and the application method of sem
 
 This paper focus on the parsing approach and application method of Chinese semantic dependency graph and conduct research on the following four directions: 
 
-\textbf{1.\ Semantic dependency graph parsing based on deep learning:} 
+1.\ \textbf{Semantic dependency graph parsing based on deep learning}. 
 We propose to parse semantic dependency graph with a transition-based method and design a transition system for graph parsing. 
 Besides, we propose a neural classifier based on Stack-LSTM, which predicts the next transition action based on the current transition state. 
 
-\textbf{2.\ Semantic Dependency Graph Parsing on Informal Texts:} 
+2.\ \textbf{Semantic Dependency Graph Parsing on Informal Texts}. 
 Although neural dependency parsers achieve fair results on datasets consisting of formal texts, its performance is much lower when applied to informal texts. 
 We propose an adversarial attack framework that generates adversarial examples and explore the robustness of neural dependency parsers with it. 
 We further propose to improve the neural parsers' performance by model ensembling and adversarial training. 
 
-\textbf{3.\ Cross-lingual semantic dependency graph parsing:} 
+3.\ \textbf{Cross-lingual semantic dependency graph parsing}. 
 Existing research on semantic dependency graph parsing mainly focused on several languages. 
 However, semantic dependency graph annotation is hard to obtain for most of languages in the world. 
 And the manual annotation is extremely expensive. 
 Therefore, we propose an approach based on label switching and graph neural network which automatically converts existing multilingual universal syntactic dependency annotation to semantic dependency graph annotation. 
 Using the automatically converted annotation and cross-lingual contextual embeddings, we train cross-lingual semantic dependency parser that effectively parses low-resource languages. 
 
-\textbf{4.\ Semantic dependency graph application based on graph neural networks:} 
+4.\ \textbf{Semantic dependency graph application based on graph neural networks}. 
 Existing research on semantic dependency graph parsing mostly focused on the construction of dataset and parsing model. 
 However, the eventual goal of semantic dependency graph parsing is to help other NLP tasks semantically. 
 We propose a graph neural network-based model, which effectively incorporate semantic information from semantic dependency graphs into pre-trained models. 

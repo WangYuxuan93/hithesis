@@ -123,6 +123,7 @@ LSTM的特性使其很适合用于抽取基于转移的依存分析器中转移�
 
 
 \section{基于转移的语义依存图分析方法}[Transition-Based Semantic Dependency Graph Parsing]
+\label{sec:chapter2-parsing-method}
 
 正如第\ref{sec:chapter2-related-work}节所介绍，List-Based Arc-Eager算法中将生成弧的动作和删除词的动作分离的思想，对于依存图的生成也有重要借鉴意义。
 因此，为了设计适用于依存图结构的分析器，本章选择了基于转移的分析方法作为突破口，并在List-Based Arc-Eager算法的基础上设计适用于语义依存图生成转移系统。
@@ -396,6 +397,7 @@ Wang和Cross等人探索了使用LSTM两个时间节点的隐层输出之差表�
 \section{实验与分析}[Experiments and Analysis]
 
 \subsection{实验设置}[Experimental Settings]
+\label{sec:chapter2-experiment-setting}
 
 本章在中文和英文的语义依存图分析语料库上分别测试了BS-IT语义依存图分析模型的性能。
 其中中文的语义依存图分析语料库来自SemEval-2016 Task 9\cite{che-etal-2016-semeval}，是哈尔滨工业大学社会计算与信息检索研究中心和北京语言大学合作标注的中文语义依存图数据，其中按照句子来源分为两个子集，分别是新闻集（NEWS）和小学课本集（TEXT），前者句子较长、较复杂，后者句子较短、较简单。
@@ -420,8 +422,11 @@ Wang和Cross等人探索了使用LSTM两个时间节点的隐层输出之差表�
     \end{tabular}
 \end{table}
 
-实验中使用的评测指标包括不计算弧标签的F值（UF）、计算弧标签的F值（LF）、有多父节点的词中不计算弧标签的F值（NUF）和有多父节点的词中计算弧标签的F值（NLF）。
+实验中使用的评价指标包括不计算弧标签的F值（UF）、计算弧标签的F值（LF）、有多父节点的词中不计算弧标签的F值（NUF）和有多父节点的词中计算弧标签的F值（NLF）。
 其中值得注意的是NLF值，该指标只统计与有多个父节点的词相连的弧的计算标签的F值，也就是将目光集中在语义依存图分析中最难以解决的弧上，因此更能反映模型解决该问题的能力。
+
+模型使用的Stack-LSTM和双向LSTM均为2层，其输入维度和隐层维度均为200。
+另外模型输入由50维词性向量、100维词向量组成，系统中历史转移动作也由50维向量表示。
 
 \subsection{实验结果}[Results]
 
