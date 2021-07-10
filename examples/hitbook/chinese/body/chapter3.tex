@@ -77,7 +77,7 @@ Han等人\cite{han-etal-2020-adversarial}于2020年在英文上开展了针对�
 
 \iffalse
 这里我们
-图~\ref{fig:adv-example}展示了一个我们的攻击算法生成的对抗样本，其中上半部分为原始文本及正确的依存句法预测结果，下半部分为我们生成的对抗样本及目标分析器预测结果（红色部分表示预测错误的依存弧和标签）。
+图\ref{fig:adv-example}展示了一个我们的攻击算法生成的对抗样本，其中上半部分为原始文本及正确的依存句法预测结果，下半部分为我们生成的对抗样本及目标分析器预测结果（红色部分表示预测错误的依存弧和标签）。
 在该实例中，我们的攻击算法只修改了一个词（将highway改为superhighway），就使得目标分析器产生了5个错误。
 
 \begin{figure}[htbp]
@@ -125,7 +125,7 @@ $$F(\bm{x}^*) \neq \bm{y}, \sigma(\bm{x}^*, \bm{x})\le \epsilon, $$
 在本章提出的方法中，通过使用多种候选词生成方法和多种候选词过滤方法来确保他们。
 在实验中，本章将分别采用流畅性和依存结构不变性两个评价指标对生成的对抗样本是否满足这两个条件进行评价。
 
-本章提出的针对依存分析模型的黑盒攻击算法如算法~\ref{algo:attack}所示，由词重要性排序（1-4行）、候选词生成（第7行）和替换词搜索（8-28行）三部分组成。
+本章提出的针对依存分析模型的黑盒攻击算法如算法\ref{algo:attack}所示，由词重要性排序（1-4行）、候选词生成（第7行）和替换词搜索（8-28行）三部分组成。
 其核心思想是对句中每个词生成若干能保证流畅性和依存结构不变性的候选词，按照句中词的重要性由高到低搜索并替换能使目标分析模型预测准确率下降的候选词。
 接下来对这三个部分进行具体介绍。
 
@@ -140,7 +140,7 @@ $$F(\bm{x}^*) \neq \bm{y}, \sigma(\bm{x}^*, \bm{x})\le \epsilon, $$
     \KwOut{对抗样本 $\bm{x}^{(i)}$}%输出
 		\For{$i=1$ to $N$}
 		{
-		    用公式~\ref{eq:word-importance}计算词重要性$I(\bm{x}^{(0)},x_i)$\;
+		    用公式\ref{eq:word-importance}计算词重要性$I(\bm{x}^{(0)},x_i)$\;
 		}
 		建立一个由$x_i\in\bm{x}^{(0)}$组成的集合$W$，其中词按照重要性$I(\bm{x}^{(0)},x_i)$从高到低排序\;
 		$t=0$\;
@@ -150,7 +150,7 @@ $$F(\bm{x}^*) \neq \bm{y}, \sigma(\bm{x}^*, \bm{x})\le \epsilon, $$
 		    初始化有效候选词集合$\mathcal{VC} \leftarrow \{\}$\;
 		    \For{$\mathcal{C}_j$中每个候选词$c_k$}
 		    {
-		        用公式~\ref{eq:mis-inc}计算准确率改变量$S(\bm{x}^{(t)},c_k,j)$\;
+		        用公式\ref{eq:mis-inc}计算准确率改变量$S(\bm{x}^{(t)},c_k,j)$\;
 		        \If{$S(\bm{x}^{(t)},c_k,j) > 0$}
 		        {
 		            将$c_k$加入集合$\mathcal{VC}$
@@ -319,7 +319,7 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 
 本章首先在中文的语义依存图数据集和英文的宾州句法树库\cite{marcus-etal-1993-building}上测试了提出的针对依存分析模型的对抗样本攻击算法。
 其中中文语义依存图数据集已经在本文第\ref{sec:chapter2-experiment-setting}节中介绍过，其具体信息见表\ref{tbl:sdp-statistics}。
-而英文宾州树库包括39832句训练集数据，1700句开发集数据和2416句测试集数据。
+而英文宾州树库包括39,832句训练集数据，1,700句开发集数据和2,416句测试集数据。
 原始的宾州树库中使用的是短语结构句法树，本章使用3.3.0版本的斯坦福依存转换器\cite{de-etal-2006-generating}将其自动转化为句法依存树。
 由于斯坦福依存关系的设计目标是尽可能地表示实词之间的关系，在句法依存分析领域大部分的研究工作在转换时都将连系动词（copula）作为其补足语的修饰语。
 例如，“I am happy”中连系动词“am”作为其补足语“happy”的修饰语，因此依存弧是由“happy”指向“am”的。
@@ -351,15 +351,17 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 
 为了测试不同类别的词向量对于基于神经网络的依存分析模型鲁棒性的影响，本章选择了以下四种词向量作为上述分析器的输入：
 
-1.\ \textbf{GloVe}\cite{pennington-etal-2014-glove}是一个固定上下文无关词向量，被广泛应用于基于神经网络的自然语言处理模型。
+1.\ \textbf{固定上下文无关词向量}。
+对于中文本章使用Word2vec方法\cite{mikolov-etal-2013-distributed}在中文Gigawords语料上训练固定上下文无关词向量（后文称为Giga）。
+对于英文本章使用GloVe词向量\cite{pennington-etal-2014-glove}，这也是一个固定的上下文无关词向量，被广泛应用于基于神经网络的自然语言处理模型。
 
 2.\ \textbf{RoBERTa}\cite{liu-etal-2019-roberta}是一个获取自预训练模型的上下文相关词向量，其预训练模型的训练目标为遮盖语言模型（masked language modeling，MLM）。
-该模型中的基本输入单位是子词（sub-word）。
+该模型中的基本输入单位是词片段（word piece）。
 实际上，该模型与BERT的模型结构完全相同，其与BERT的主要区别是在训练过程中使用了更多的无标注数据。
 多个数据集上的实验表明该模型取得了显著好于BERT的性能。
 
 3.\ \textbf{ELECTRA}\cite{clark-etal-2020-electra}是一个获取自预训练模型的上下文相关词向量，其预训练模型的训练目标为替换词检测（ replaced token detection），即预测被修改的输入文本中哪个词被修改过。
-该模型中的基本输入单位是子词。
+该模型中的基本输入单位是词片段。
 
 4.\ \textbf{ELMo}\cite{peters-etal-2018-deep}是一个获取自预训练模型的上下文相关词向量，其训练目标为双向语言模型。
 该模型中的基本输入单位是字。
@@ -390,10 +392,10 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 
 
 \subsection{对抗样本攻击实验结果及分析}[Results and Analysis for Adversarial Attack]
-
+\label{sec:chapter3-results}
 
 \begin{table}[htbp]
-	\bicaption[tbl:ptb-eval-result]{}{PTB-SD-3.3.0-COP测试集上自动评价和人工评价结果}{Table$\!$}{Automatic and human evaluation results on PTB-SD-3.3.0-COP.}
+	\bicaption[tbl:ptb-eval-result]{}{PTB-SD-3.3.0-COP上自动评价和人工评价结果}{Table$\!$}{Automatic and human evaluation results on PTB-SD-3.3.0-COP.}
     \vspace{0.5em}\centering\wuhao
 	\begin{tabular}{lccc}
 		\toprule[1.5pt]
@@ -407,14 +409,14 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 	\end{tabular}
 \end{table}
 
-表~\ref{tbl:ptb-eval-result}中列出了在英文PTB-SD-3.3.0-COP测试集上本章提出的攻击算法（Ours）与此前方法生成的对抗样本质量的评价结果。
+表\ref{tbl:ptb-eval-result}中列出了在英文PTB-SD-3.3.0-COP测试集上本章提出的攻击算法（Ours）与此前方法生成的对抗样本质量的评价结果。
 具体来说，在自动评价方面，本章方法生成的对抗样本平均困惑度为139.99，远低于此前方法。
 而相应的原始文本的平均困惑度为127.67，与本章方法取得的结果十分接近。
 在人工评价方面，结果显示对于80\%的句子来说，本章方法生成的对抗样本流畅性优于此前方法。
 此外，本章方法生成的对抗样本中有85\%的依存结构都是不变的，而此前方法生成的对抗样本中仅75\%依存结构不变。
 
 \begin{table}[htbp]
-	\bicaption[tbl:ptb-attack-cop]{}{PTB-SD-3.3.0-COP测试集上的结果}{Table$\!$}{Results on PTB-SD-3.3.0-COP test set.}
+	\bicaption[tbl:ptb-attack-cop]{}{PTB-SD-3.3.0-COP上的攻击结果}{Table$\!$}{Adversarial attack results on PTB-SD-3.3.0-COP.}
     \vspace{0.5em}\centering\wuhao
 	\begin{tabular}{lccc}
 		\toprule[1.5pt]
@@ -430,10 +432,10 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 由于Zheng等人只对无标签的句法依存分析进行了实验，为了与他们对比，该表中也只使用了UAS。
 结果表明，本章方法的攻击成功率低于Zheng等人的方法，但攻击前后的UAS则基本相同。
 因为UAS是逐词统计的，而攻击成功率是逐句统计的，表中结果说明本章方法在针对词的攻击上基本与此前方法相同，但攻击成功的句子要明显少于此前方法。
-结合表~\ref{tbl:ptb-eval-result}中的对抗样本质量评价结果，可以认为此前方法攻击成功的一些对抗样本可能是无效的。
+结合表\ref{tbl:ptb-eval-result}中的对抗样本质量评价结果，可以认为此前方法攻击成功的一些对抗样本可能是无效的。
 
 \begin{table}[htbp]
-	\bicaption[tbl:ptb-attack-main]{}{PTB-SD-3.3.0测试集上的结果}{Table$\!$}{Experimental results on PTB-SD-3.3.0 test set.}
+	\bicaption[tbl:ptb-attack-main]{}{PTB-SD-3.3.0上不同模型的攻击结果}{Table$\!$}{Adversarial attack results on PTB-SD-3.3.0 with different models.}
     \vspace{0.5em}\centering\wuhao
 	\begin{tabular}{llccccc}
 		\toprule[1.5pt]
@@ -454,15 +456,17 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 	\end{tabular}
 \end{table}
 
-为了方便此后的工作进行对比，本章同时在使用更广泛的PTB-SD-3.3.0数据集上进行了实验，对比了两类分析器和四类词向量的鲁棒性结果见表~\ref{tbl:ptb-attack-main}。
+为了方便此后的工作进行对比，本章同时在使用更广泛的PTB-SD-3.3.0数据集上进行了实验，对比了两类分析器和四类词向量的鲁棒性，结果见表\ref{tbl:ptb-attack-main}。
 结果显示基于图的Biaffine分析器在输入向量相同的情况下普遍好于基于转移的Stack-Pointer分析器，而二者面对对抗样本攻击时鲁棒性差距不大。
-在四种输入表示中，ELECTRA在原始文本作为输入时取得最好实验结果，RoBERTa次之，GloVe最差。
-但在面对对抗样本攻击时，RoBERTa表现最好，ELMo也表现出了近似的鲁棒性，而ELECTRA则变现的很不好，其攻击成功率仅次于GloVe。
+在四种输入表示中，ELECTRA和RoBERTa两种基于预训练模型的词向量在原始文本作为输入时取得最好实验结果，ELMo次之，GloVe最差。
+但在面对对抗样本攻击时，RoBERTa鲁棒性最好，ELMo次之，而ELECTRA的鲁棒性则比ELMo弱，针对其的攻击成功率仅次于针对GloVe的攻击成功率。
+虽然ELECTRA在原始文本上取得了与RoBERTa近似的性能，但其在对抗样本上的性能却远低于RoBERTa。
 这可能是因为ELECTRA的训练目标是预测句中哪个词被修改过，而这种训练目标使得其将很多正确的替换词也视为错误，从而降低了它的鲁棒性。
+最后，上下文无关的固定词向量GloVe显示出了最弱的鲁棒性。
 
 
 \begin{table}[ht]
-	\bicaption[tbl:oov-oot-result]{}{OOV和OOT词实验结果}{Table$\!$}{OOV and OOT test results.}
+	\bicaption[tbl:ptb-oov-oot-result]{}{PTB-SD-3.3.0上的未登录词和OOT词实验结果}{Table$\!$}{OOV and OOT test results on PTB-SD-3.3.0.}
     \vspace{0.5em}\centering\wuhao
 	\begin{tabular}{lccccccccc}
 		\toprule[1.5pt]
@@ -472,34 +476,35 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 		\midrule[1pt]
 		50k  &95.36 &93.49 &2  &24 &87.58 &83.73 &972 &1285 &59.5 \\
 		400k &95.36 &93.49 &0  &15 &88.69 &85.09 &2       &906  &55.3 \\
-		400k (T.) &95.36 &93.49 &0  &8  &90.06 &87.26 &0 &0 &45.5 \\
+		400k（T.） &95.36 &93.49 &0  &8  &90.06 &87.26 &0 &0 &45.5 \\
 		\bottomrule[1.5pt]
 	\end{tabular}
 \end{table}
 
 
-为了探究未登录（Out-of-Vocabulary，OOV）词和未在训练集出现（Out-of-Training，OOT）词对于对抗样本攻击的影响，我们用Biaffine分析器和GloVe向量进行了实验，在训练时使用不同大小的词表，实验结果见表~\ref{tbl:oov-oot-result}。
-其中\textbf{Base}模型词表大小为39073，而\textbf{Large}模型词表大小为371025。
-\textbf{Base (T.)}表示在对\textbf{Base}模型攻击时只允许从训练集中出现过的词中搜索替换词。
-而相应的攻击前后未登录词和未在训练集出现词的数量见表~\ref{tbl:oov-oot-num}。
-对比\textbf{Base}和\textbf{Large}模型被攻击前后的实验结果及未登录词数量统计，我们有理由认为对抗样本中出现的未登录词会引起模型预测错误。
-而更大的词表能通过降低未登录词出现的可能性从而有效增强模型的鲁棒性。
-此外，通过对比\textbf{Base}和\textbf{Base (T.)}的结果，我们可以认为未在训练集中出现过的词也会降低模型预测的准确率。
+接下来，本章使用提出的对抗样本攻击算法对基于神经网络的依存分析模型鲁棒性进行深入探究。
+首先，本章探究未登录（Out-of-Vocabulary，简称OOV）词和未在训练集出现（Out-of-Training，简称OOT）词对于模型鲁棒性的影响。
+具体来说，本章选取Biaffine分析器和GloVe词向量，进行了三个实验：
+（1）训练分析器时使用GloVe中出现频率最高的50,000词作为词表然后进行攻击（50k）；
+（2）训练分析器时使用GloVe中所有的400,000词作为词表然后进行攻击（400k）；
+（3）训练分析器时使用GloVe中所有的400,000词作为词表，在攻击时额外将未在训练集中出现过的词过滤掉（400k（T.））。
+同时，本章统计了在对抗样本攻击过程中被替换的原始词和攻击算法选取的用于替换的候选词中未登录词和OOT词的比例，实验结果见表\ref{tbl:ptb-oov-oot-result}。
 
-针对未在训练集中出现过的词，一个可能的解决方案是对抗学习，即使用对抗攻击算法对训练数据生成对抗样本，然后用原始训练数据和对抗样本混合训练分析器。
-此前的工作\cite{zheng2020evaluating}已证明此方法的有效性。
-然而在现实情况下我们很难在训练时就获知对抗攻击算法，而且使用这种对抗学习也有使得模型过拟合到对抗样本的风险。
-因此我们基于上文实验的观察结果，提出几种不需要对抗攻击算法就能增强模型鲁棒性的方法。
+首先，通过对比50k模型攻击实验中的原始词和替换词中未登录词和OOT词的数量，可以发现被攻击算法选中作为替换目标的原始词大部分都不是未登录词和OOT词，而用于替换它们的词则有大量是未登录词和OOT词。
+其次，通过对比50k模型和400k模型攻击实验的结果，可以发现更大的词表显著降低了替换词中未登录词的数量，与此相伴的是攻击成功率的显著下降。
+基于此，有理由相信测试样本中出现未登录词是神经网络模型鲁棒性弱的原因之一。
+最后，通过对比400k模型和400k（T.）模型攻击实验的结果，可以发现，当攻击算法只能从训练集中出现过的词中选取用于替换的候选词时，攻击后的替换词中OOT词的数量被减少到0。
+而相对的，攻击成功率也有大幅下降。
+因此，可以认为测试样本中出现训练集中未出现过的词也是神经网络模型鲁棒性弱的原因之一。
 
-表~\ref{tbl:attack-increase}中列出了使用上述策略后模型面对对抗样本攻击的实验结果。
-结果显示这三种策略都能有效提高模型鲁棒性，降低攻击成功率。
-当这三者结合起来的时候效果最好。
-由于我们在训练过程中没有使用任何对抗样本，这三种策略也没有使模型过拟合到某种特定攻击的风险。
-这部分工作已投往AAAI 2021，后续计划将该攻击算法的目标扩展到语义依存图分析。
-
+上文发现的神经网络模型鲁棒性弱的两个原因中，未登录词的问题一般只存在于使用GloVe等固定的词向量的模型中。
+这是因为ELMo以字作为基本输入单位，RoBERTa和ELECTRA以词片段作为基本输入单位，对于它们来说，未登录词的问题已经被更细粒度的输入有效缓解了。
+而根据上文得出的结论，未登录词的导致的模型鲁棒性弱的问题可以通过增大词表很好的缓解。
+另一方面，对于OOT词导致的模型鲁棒性弱的问题，一个可能的解决方案是对抗样本训练，即将针对训练集生成的对抗样本与原始训练数据混合，重新训练鲁棒性更强的模型。
+本章在第\ref{sec:chapter3-adv-training}节对该方法进行了实验。
 
 \begin{table}[h]
-	\bicaption[tbl:transfer-test-biaffine]{}{Biaffine分析器作为源模型的对抗样本传递性实验结果}{Table$\!$}{Results in the transferability test with Biaffine parser as the source parser.}
+	\bicaption[tbl:ptb-transfer-test-biaffine]{}{PTB-SD-3.3.0上Biaffine分析器作为源模型的对抗样本迁移能力实验结果}{Table$\!$}{Transferability test with Biaffine parser as the source parser on PTB-SD-3.3.0.}
     \vspace{0.5em}\centering\wuhao
 	\begin{tabular}{lcccccc}
 		\toprule[1.5pt]
@@ -516,7 +521,7 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 \end{table}
 
 \begin{table}[h]
-	\bicaption[tbl:transfer-test-biaffine]{}{Stack-Pointer分析器作为源模型的对抗样本传递性实验结果}{Table$\!$}{Results in the transferability test with Stack-Pointer parser as the source parser.}
+	\bicaption[tbl:ptb-transfer-test-stackptr]{}{PTB-SD-3.3.0上Stack-Pointer分析器作为源模型的对抗样本迁移能力实验结果}{Table$\!$}{Transferability test with Stack-Pointer parser as the source parser on PTB-SD-3.3.0.}
     \vspace{0.5em}\centering\wuhao
 	\begin{tabular}{lcccccc}
 		\toprule[1.5pt]
@@ -532,40 +537,55 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 	\end{tabular}
 \end{table}
 
+对抗样本的迁移能力（transferability）指的是针对某一个模型生成的对抗样本使另一个模型产生误判的能力。
+如果针对模型A生成的对抗样本$x$同样能使模型B产生误判，则称该对抗样本$x$在模型A和B之间是可迁移的（transferable）。
+在下文中，将首先作为攻击目标的模型称为源模型，源模型使用的词向量称为源词向量。
+Jin等人\cite{jin-etal-2020-isbert}于2020年发现在文本分类任务上，针对某一类别的模型生成的对抗样本集合中，并不是所有的对抗样本都能成功误导另一类别的模型。
+本章接下来将在依存分析任务上测试以下三种情况下的对抗样本迁移能力：
 
-\subsection{基于模型融合的鲁棒性提升方法}[Robustness Increasing Approach Based on Model Ensemble]
+1.\textbf{夸随机种子迁移}：使用相同的分析模型和词向量，不同的初始化随机种子训练两个模型，针对其中一个生成对抗样本，然后使用另一个模型分析这些对抗样本。
+
+2.\textbf{夸模型迁移}：使用相同的词向量训练不同类别的两个分析模型，针对其中一个生成对抗样本，然后使用另一个模型分析这些对抗样本。
+
+3.\textbf{夸词向量迁移}：使用不同的词向量训练相同类别的两个分析模型，针对其中一个生成对抗样本，然后使用另一个模型分析这些对抗样本。
+
+表\ref{tbl:ptb-transfer-test-biaffine}和\ref{tbl:ptb-transfer-test-stackptr}分别列出了选择Biaffine分析器和Stack-Pointer分析器作为源模型时三种情况下的对抗样本迁移能力实验结果，以攻击成功率的形式呈现。
+实验结果表明，当针对某一模型生成的对抗样本被应用在其他模型上时，其攻击成功率都会或多或少的下降，也就是说其迁移能力是有限的。
+根据表中三种情况下的攻击成功率变化，可以发现跨随机种子攻击的迁移能力是其中最强的，跨模型攻击其次，而跨词向量攻击的迁移能力最弱。
+上述结果表明，针对不同类别、使用不同词向量甚至不同初始化随机种子的分析模型生成的对抗样本都是不同的。
+基于此发现，本章在第\ref{sec:chapter3-ensemble}节提出了基于模型融合的鲁棒性增强方法，利用不同分析模型的差异性互相帮助，从而提升最终模型的鲁棒性。
+
+
+\subsection{基于对抗样本训练的鲁棒性增强方法}[Robustness Increasing Approach Based on Adversarial Training]
+\label{sec:chapter3-adv-training}
+
+在第\ref{sec:chapter3-results}节的分析实验中，本章证明了测试样本中未在训练集出现的词容易使基于神经网络的依存分析模型产生误判。
+而为了缓解这一问题，本章采用了对抗样本训练的方法，首先使用本章提出的对抗样本攻击算法针对训练集生成对抗样本，然后将这些对抗样本与原始训练集数据混合重新训练新的分析模型。
+此前的工作\cite{han-etal-2020-adversarial}已证明此方法的有效性，但为了避免新的分析模型过拟合到对抗样本上，他们只将2,000句对抗样本加入了训练集。
+而宾州树库的训练集一共有39,832个句子。
+本章首先利用提出的生成高质量对抗样本的攻击算法针对训练集生成对抗样本，然后测试将不同比例的对抗样本加入原始训练集中重新训练分析器对其鲁棒性以及在规范的测试样本上性能的影响。
+
+\begin{figure}[hbtp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{figures/adv_training_after_attack.pdf}
+	\bicaption[fig:ptb-adv-training]{}{PTB-SD-3.3.0上的对抗样本训练实验结果}{Fig.$\!$}{Adversarial trainig results on PTB-SD-3.3.0.}
+\end{figure}
+
+具体来说，在PTB-SD-3.3.0上，本文分别测试了在原始训练集数据中增加10\%、30\%、50\%、70\%和100\%的训练集对抗样本后重新训练的分析器的性能和鲁棒性。
+训练的分析器包括Biaffine分析器和Stack-Pointer分析器，使用的词向量包括GloVe、ELMo、ELECTRA和RoBERTa。
+实验结果如图\ref{fig:ptb-adv-training}所示，其中通过攻击后LAS来反映模型的鲁棒性。
+从图中可以发现，所有类别的模型鲁棒性都随着训练中使用的对抗样本数量的增加而增加。
+在初始阶段（30\%）之前增长较快，在使用50\%至70\%的对抗样本时鲁棒性增长逐渐趋于平缓。
+但不少模型（如使用GloVe词向量的Biaffine模型）在使用100\%的训练集对抗样本时鲁棒性仍然在增长。
+
+为了反映使用对抗样本训练的模型在原始规范测试集上的性能，表\ref{tbl:ptb-adv-train-result}给出了PTB-SD-3.3.0上使用100\%训练集对抗样本的对抗样本训练实验结果。
+其中括号里的数值表示该模型与使用相同类别分析器及词向量，但不使用对抗样本训练的分析模型之间的差距。
+从表中可以发现，通过对抗样本训练，所有类别的模型的鲁棒性都得到了显著提升。
+而经过对抗样本训练的模型在原始规范文本组成的测试集上的性能并没有受到太大影响。
+甚至对某些模型来说（例如使用ELMo词向量的Stack-Pointer模型），使用对抗样本训练还能略微提升其在原始测试集上的性能。
 
 \begin{table}[htbp]
-	\bicaption[tbl:embed-ens-result]{}{跨词向量模型融合实验结果}{Table$\!$}{Cross-embedding ensemble results.}
-    \vspace{0.5em}\centering\wuhao
-	\begin{tabular}{lccccc}
-		\toprule[1.5pt]
-		\multirow{2}{*}{词向量}& \multicolumn{2}{c}{原始结果} & \multicolumn{2}{c}{攻击后结果} & \multirow{2}{*}{攻击成功率\%} \\
-		\cmidrule(r){2-3} \cmidrule(r){4-5}
-		& UAS & LAS & UAS & LAS & \\
-		\midrule[1pt]
-		\multicolumn{6}{c}{Biaffine} \\
-		\hline
-		RoBERTa        &97.09 & 95.41 &92.14 &89.42 &46.1 \\
-		+GloVe     &97.16 & 95.55 &92.39 &89.77 &43.8 \\
-		+ELMo   &97.20 & 95.58 &92.53 &89.97 &42.5 \\
-		+ELECTRA &\bf97.25 &\bf95.63 &\bf92.73 &\bf90.12 &\bf41.5 \\
-		\hline
-		\multicolumn{6}{c}{Stack-Pointer} \\
-		\hline
-		RoBERTa        &96.93 & 95.20 &91.58 &88.84 &45.1 \\
-		+GloVe     &97.01 & 95.32 &92.15 &89.49 &43.4 \\
-		+ELMo   &96.98 & 95.26 &\bf 92.28 &89.62 &42.3 \\
-		+ELECTRA &\bf 97.14 &\bf 95.45 &92.27 &\bf 89.64 &\bf 41.5 \\
-		\bottomrule[1.5pt]
-	\end{tabular}
-\end{table}
-
-
-\subsection{基于对抗样本训练的鲁棒性提升方法}[Robustness Increasing Approach Based on Adversarial Training]
-
-\begin{table}[htbp]
-	\bicaption[tbl:adv-train-result]{}{对抗样本学习实验结果}{Table$\!$}{Adversarial training results.}
+	\bicaption[tbl:ptb-adv-train-result]{}{PTB-SD-3.3.0上的对抗样本训练实验结果}{Table$\!$}{Adversarial training results on PTB-SD-3.3.0.}
     \vspace{0.5em}\centering\wuhao
 	\begin{tabular}{lccccc}
 		\toprule[1.5pt]
@@ -600,7 +620,7 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 
 \iffalse
 \begin{table}[htbp]
-	\bicaption[tbl:adv-train-result]{}{对抗样本学习实验结果}{Table$\!$}{Adversarial training results.}
+	\bicaption[tbl:adv-train-result]{}{对抗样本训练实验结果}{Table$\!$}{Adversarial training results.}
     \vspace{0.5em}\centering\wuhao
 	\begin{tabular}{lccccc}
 		\toprule[1.5pt]
@@ -640,8 +660,74 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 \end{table}
 \fi
 
+
+
+\subsection{基于模型融合的鲁棒性增强方法}[Robustness Increasing Approach Based on Model Ensemble]
+\label{sec:chapter3-ensemble}
+
+在第\ref{sec:chapter3-results}节的分析实验中，本章证明了针对不同分析模型生成的对抗样本都是不同的。
+基于此发现，本章提出使用模型融合方法提升依存分析模型的鲁棒性。
+在前文中探讨了跨随机种子、跨模型和跨词向量三种对抗样本迁移情况。
+由于不同的依存分析模型之间差异巨大，难以实现模型融合，本节仅对跨随机种子模型融合和跨词向量模型融合方法进行实验。
+
+具体来说，假设有A和B两个模型需要融合，对于基于图的Biaffine分析模型，本章首先分别用模型A和模型B对输入句子进行分析，获取每两个词之间存在弧的分数，然后将模型A和模型B得到的分数相加，用于解码过程生成目标依存结构。
+对于基于转移的IT-BS和Stack-Pointer分析模型，本章在每个转移状态下分别使用模型A和模型B对下一个要执行的转移动作进行预测，获取每个转移动作的分数，然后将模型A和模型B得到的分数相加，选择分数之和最高的转移动作作为接下来要执行的动作。
+
+\begin{figure}[hbtp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{figures/ensemble_seed_attack_succ.pdf}
+	\bicaption[fig:ptb-cross-seed-ensemble]{}{PTB-SD-3.3.0上的跨随机种子模型融合实验结果}{Fig.$\!$}{Cross-seed ensemble results on PTB-SD-3.3.0.}
+\end{figure}
+
+图\ref{fig:ptb-cross-seed-ensemble}给出了在PTB-SD-3.3.0上使用Biaffine分析器和Stack-Pointer分析器分别进行跨随机种子模型融合的实验结果，以攻击成功率呈现。
+实验结果表明，对于绝大部分分析模型，跨随机种子模型融合都能有效降低攻击成功率，增强其鲁棒性。
+只有使用RoBERTa作为输入的Stack-Pointer模型的在进行跨随机种子模型融合鲁棒性没有增强。
+另外，在图中所示的四种词向量中，模型融合方法对于使用ELMo的分析模型鲁棒性增强效果最好。
+
+\begin{table}[htbp]
+	\bicaption[tbl:ptb-cross-embed-ensemble]{}{PTB-SD-3.3.0上的跨词向量模型融合实验结果}{Table$\!$}{Cross-embedding ensemble results on PTB-SD-3.3.0.}
+    \vspace{0.5em}\centering\wuhao
+	\begin{tabular}{lccccc}
+		\toprule[1.5pt]
+		\multirow{2}{*}{词向量}& \multicolumn{2}{c}{原始结果} & \multicolumn{2}{c}{攻击后结果} & \multirow{2}{*}{攻击成功率\%} \\
+		\cmidrule(r){2-3} \cmidrule(r){4-5}
+		& UAS & LAS & UAS & LAS & \\
+		\midrule[1pt]
+		\multicolumn{6}{c}{Biaffine} \\
+		\hline
+		RoBERTa        &97.09 & 95.41 &92.14 &89.42 &46.1 \\
+		+GloVe     &97.16 & 95.55 &92.39 &89.77 &43.8 \\
+		+ELMo   &97.20 & 95.58 &92.53 &89.97 &42.5 \\
+		+ELECTRA &\bf97.25 &\bf95.63 &\bf92.73 &\bf90.12 &\bf41.5 \\
+		\hline
+		\multicolumn{6}{c}{Stack-Pointer} \\
+		\hline
+		RoBERTa        &96.93 & 95.20 &91.58 &88.84 &45.1 \\
+		+GloVe     &97.01 & 95.32 &92.15 &89.49 &43.4 \\
+		+ELMo   &96.98 & 95.26 &\bf 92.28 &89.62 &42.3 \\
+		+ELECTRA &\bf 97.14 &\bf 95.45 &92.27 &\bf 89.64 &\bf 41.5 \\
+		\bottomrule[1.5pt]
+	\end{tabular}
+\end{table}
+
+表\ref{tbl:ptb-cross-embed-ensemble}给出了在PTB-SD-3.3.0上使用Biaffine分析器和Stack-Pointer分析器分别进行跨词向量模型融合的实验结果。
+为了更清晰地展现该方法的有效性，表中将使用鲁棒性最强的RoBERTa词向量训练的分析模型作为基础，并逐步将使用另外三种词向量训练的分析模型与其融合。
+从实验结果中可以发现，每一种新的词向量训练的模型的加入都使融合模型的鲁棒性得到了增强。
+而同时融合四种词向量训练的分析模型得到的融合模型同时在原始结果和攻击后结果上取得了最好性能，针对此模型的攻击成功率也是最低的。
+
+值得注意的是，相比于第\ref{sec:chapter3-adv-training}节中使用的对抗样本训练方法，本节提出的模型融合方法不仅在原始测试数据集上不会带来性能下降，反而会有一定提升。
+除此之外，对抗样本训练方法需要提前获取对抗样本，而且有使得模型过拟合到对抗样本的风险。
+而模型融合方法在训练时只需要使用原始训练集，且没有过拟合到对抗样本的风险。
+但相对的，模型融合方法需要多个分析模型同时预测，在使用时会占用更多的计算资源。
+
 \section{本章小结}[Conclusions]
 
+本章针对语义依存图分析模型性能在非规范文本上显著下降的问题，首先设计了针对基于神经网络的依存分析模型的对抗样本攻击算法。
+该算法使用多种方法生成并过滤候选词，保证候选词的数量和质量，从而生成流畅性和依存结构不变性有保障的对抗样本。
+本章接着利用该攻击算法对现有各种类型的依存分析模型和作为模型输入的词向量的鲁棒性进行深入探索，并发现：
+（1）测试样本中的未登录词和训练集中未出现过的词是导致依存分析模型误判的重要原因；
+（2）攻击算法针对不同类别分析器、不同词向量甚至不同初始化随机种子训练的分析模型生成的对抗样本都不同。
+基于这两点发现，本章提出了对抗样本训练和模型融合方法，有效增强了现存的基于神经网络的依存分析模型的鲁棒性。
 
 % Local Variables:
 % TeX-master: "../thesis"
