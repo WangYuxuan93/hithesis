@@ -76,44 +76,6 @@ Han等人\cite{han-etal-2020-adversarial}于2020年在英文上开展了针对�
 %尽管基于深度神经网络的模型在自然语言处理领域的很多任务上都取得了很好的成果，但对抗样本攻击揭示了这类模型脆弱的一面。
 %为了提高现有依存分析器的鲁棒性，使其适用于现实复杂场景，我们首先设计对抗样本攻击算法，针对现有各类依存分析器生成对抗样本，并对生成的样本进行分析，在此基础上提出了增强分析器鲁棒性的方法。
 
-\iffalse
-这里我们
-图\ref{fig:adv-example}展示了一个我们的攻击算法生成的对抗样本，其中上半部分为原始文本及正确的依存句法预测结果，下半部分为我们生成的对抗样本及目标分析器预测结果（红色部分表示预测错误的依存弧和标签）。
-在该实例中，我们的攻击算法只修改了一个词（将highway改为superhighway），就使得目标分析器产生了5个错误。
-
-\begin{figure}[htbp]
-	\centering
-	\begin{dependency}[theme = simple,label style={font=\bfseries}]
-		\begin{deptext}[column sep=0.45em]
-			A\& bus\& is\& the\& data\& \textcolor{green}{highway}\& within\& a\& computer \\ %\& . \\
-			A\& bus\& is\& the\& data\& \textcolor{red}{\textit{\textbf{superhighway}}}\& within\& a\& computer \\%\& . \\
-		\end{deptext}
-		\deproot{6}{root}
-		\depedge{2}{1}{det}
-		\depedge{6}{2}{nsubj}
-		\depedge{6}{3}{cop}
-		\depedge{6}{4}{det}
-		\depedge{6}{5}{nn}
-		\depedge{6}{7}{prep}
-		\depedge{9}{8}{det}
-		\depedge{7}{9}{pobj}
-		%\depedge{6}{10}{punct}
-		
-		\deproot[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{\textit{root}}
-		\depedge[edge below, label style={below}]{2}{1}{det}
-		\depedge[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{2}{nsubj}
-		\depedge[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{3}{cop}
-		\depedge[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{4}{det}
-		\depedge[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{6}{\textit{partmod}}
-		\depedge[edge below, label style={below}]{6}{7}{prep}
-		\depedge[edge below, label style={below}]{9}{8}{det}
-		\depedge[edge below, label style={below}]{7}{9}{pobj}
-		%\depedge[edge below, dashed, edge style={red}, label style={below, font=\bfseries, text=red}]{5}{10}{\textit{punct}}
-	\end{dependency}
-	\bicaption[fig:adv-example]{}{对抗样本实例}{Fig.$\!$}{Example of an adversarial example.}
-\end{figure}
-\fi
-
 下面首先给出针对依存分析模型进行对抗样本攻击的形式化定义。
 给定包括所有可能输入句子$\bm{x}$的输入文本空间$\mathcal{X}$和包括$\bm{x}$所有可能依存结构的输出空间$\mathcal{Y}$。
 一个依存分析模型$F: \mathcal{X} \rightarrow \mathcal{Y}$的目标是学习一个从输入句子$\bm{x}$到其对应依存结构$\bm{y}$的映射，记为$F(\bm{x}) = \bm{y}$。
@@ -314,7 +276,7 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 否则继续搜索下一个目标词的候选词。
 
 
-\section{对抗样本攻击实验结果与分析}[Experiments and Analysis of Adversarial Attack]
+\section{实验结果与分析}[Experiments and Analysis]
 
 \subsection{实验设置}[Experimental Settings]
 
@@ -511,7 +473,7 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 		\cmidrule(r){2-2} \cmidrule(r){3-4}
 		& 困惑度 &  流畅性\% & 依存结构不变性\%  \\
 		\midrule[1pt]
-		Zheng et al. & 267.96 & 20 & 75 \\
+		\citet{zheng-etal-2020-evaluating} & 267.96 & 20 & 75 \\
 		Ours &\bf 139.99 &\bf 80 &\bf 85  \\
 		\bottomrule[1.5pt]
 	\end{tabular}
@@ -530,7 +492,7 @@ $\lambda_{\text{arc}}$是一个控制依存弧和标签相对重要性的系数�
 		\toprule[1.5pt]
 		模型& 原始UAS & 攻击后UAS & 攻击成功率\% \\
 		\midrule[1pt]
-		Zheng et al. & 95.52 & 88.69 & 51 \\
+		\citet{zheng-etal-2020-evaluating} & 95.52 & 88.69 & 51 \\
 		Ours & 95.45 & 88.95 &  44 \\
 		\bottomrule[1.5pt]
 	\end{tabular}

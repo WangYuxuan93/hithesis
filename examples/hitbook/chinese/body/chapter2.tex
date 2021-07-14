@@ -482,17 +482,17 @@ BS-IT表示本章中提出的模型。
 		\midrule[1pt]
 		\multicolumn{5}{c}{IN-DOMAIN}\\
 		\hline
-		Du 15 (ensemble) &89.1&91.3&75.7&85.4\\
-		Almeida 15 (single) &88.2&90.9&76.4&85.2\\
-		Peng 17 (single) &89.4&\bf 92.2&77.6&86.4\\
+		\citet{du-etal-2015-peking} (ensemble) &89.1&91.3&75.7&85.4\\
+		\citet{almeida-martins-2015-lisbon} (single) &88.2&90.9&76.4&85.2\\
+		\citet{peng-etal-2017-deep} (single) &89.4&\bf 92.2&77.6&86.4\\
 		BS-IT (single) &89.3&91.4&76.1&85.6\\
 		BS-IT (ensemble) &\bf 90.3& 91.7&\bf 78.6&\bf 86.9\\
 		\hline
 		\multicolumn{5}{c}{OUT-OF-DOMAIN}\\
 		\hline
-		Du 15 (ensemble) &81.8&87.2&73.3&80.8\\
-		Almeida 15 (single) &81.8&86.9&74.8&81.2\\
-		Peng 17 (single) &84.5&\bf 88.3&75.3&82.7\\
+		Du et al. (ensemble) &81.8&87.2&73.3&80.8\\
+		Almeida et al. (single) &81.8&86.9&74.8&81.2\\
+		Peng et al. (single) &84.5&\bf 88.3&75.3&82.7\\
 		BS-IT (single) &83.2&87.2&73.2&81.2\\
 		BS-IT (ensemble) &\bf 84.9&87.6&\bf 75.9&\bf 82.8\\
 		\bottomrule[1.5pt]
@@ -502,10 +502,10 @@ BS-IT表示本章中提出的模型。
 表\ref{tbl:result-semeval15}中列出了英文语义依存图数据集上的实验结果，其中所列均为LF值，single表示单模型方法，ensemble表示多模型融合方法。
 下面分别介绍表中所列的各个基线模型：
 \begin{itemize}
-    \item Du 15 \cite{du-etal-2015-peking} ：该模型由Du等人于2015年提出，其中利用了多个不同的基于转移和基于图的模型同时预测并对最终结果进行投票。
+    \item \citet{du-etal-2015-peking} ：该模型由Du等人于2015年提出，其中利用了多个不同的基于转移和基于图的模型同时预测并对最终结果进行投票。
     因此该模型是一个融合模型。
-    \item Almeida 15 \cite{almeida-martins-2015-lisbon}：该模型由Almeida等人于2015年提出，其中使用了基于图的依存分析方法，使用了依存图结构中独有的二阶特征，并利用AD$^3$算法\cite{martins-etal-2011-dual}进行解码。
-    \item Peng 17 \cite{peng-etal-2017-deep}：该方法由Peng等人于2017年提出，他们使用一个基于图的方法，同时利用英文语义依存图数据库中的三种标注体系进行多任务学习，取得了该数据集上当时最好结果。由于本章中并没有使用多任务学习方法，这里列出的是他们没有使用多任务学习的基础模型结果。
+    \item \citet{almeida-martins-2015-lisbon}：该模型由Almeida等人于2015年提出，其中使用了基于图的依存分析方法，使用了依存图结构中独有的二阶特征，并利用AD$^3$算法\cite{martins-etal-2011-dual}进行解码。
+    \item \citet{peng-etal-2017-deep}：该方法由Peng等人于2017年提出，他们使用一个基于图的方法，同时利用英文语义依存图数据库中的三种标注体系进行多任务学习，取得了该数据集上当时最好结果。由于本章中并没有使用多任务学习方法，这里列出的是他们没有使用多任务学习的基础模型结果。
 \end{itemize}
 
 表\ref{tbl:result-semeval15}中BS-IT表示本章提出的系统的结果。
