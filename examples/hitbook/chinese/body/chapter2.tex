@@ -399,17 +399,10 @@ Wang和Cross等人探索了使用LSTM两个时间节点的隐层输出之差表�
 \subsection{实验设置}[Experimental Settings]
 \label{sec:chapter2-experiment-setting}
 
-本章在中文和英文的语义依存图分析语料库上分别测试了BS-IT语义依存图分析模型的性能。
-其中中文的语义依存图分析语料库来自SemEval-2016 Task 9\cite{che-etal-2016-semeval}，是哈尔滨工业大学社会计算与信息检索研究中心和北京语言大学合作标注的中文语义依存图数据，其中按照句子来源分为两个子集，分别是新闻集（NEWS）和小学课本集（TEXT），前者句子较长、较复杂，后者句子较短、较简单。
-而英文的语义依存图分析语料库来自SemEval-2015 Task 18\cite{oepen-etal-2015-semeval}英文广义语义依存图数据集。
-该数据集一共有三种标注规范（DM、PAS和PSD），每种规范都有两部分测试数据集，即同领域（IN-DOMAIN）与异领域（OUT-OF-DOMAIN)测试数据。
-中英文数据集的相关信息见表\ref{tbl:sdp-statistics}。
-值得注意的是，由于DM、PAS和PSD是在相同的语料上按照不同的标注规范标注的，它们的各个集合的句子数是相同的，只有标签数量不同。
-
 \begin{table}[htbp]
     \bicaption[tbl:sdp-statistics]{}{语义依存图语料库信息}{Table$\!$}{Statistics of Chinese semantic dependency graph dataset.}
     \vspace{0.5em}\centering\wuhao
-    \begin{tabular}{ccccccc}
+    \begin{tabular}{lcccccc}
         \toprule[1.5pt]
         数据集 & 标签数 & 训练集 & 开发集 & 同领域测试集 & 异领域测试集 & 平均句子长度 \\
         \midrule[1pt]
@@ -421,6 +414,34 @@ Wang和Cross等人探索了使用LSTM两个时间节点的隐层输出之差表�
         \bottomrule[1.5pt]
     \end{tabular}
 \end{table}
+
+本章在中文和英文的语义依存图分析语料库上分别测试了BS-IT语义依存图分析模型的性能。
+其中中文的语义依存图分析语料库来自SemEval-2016 Task 9\cite{che-etal-2016-semeval}，是哈尔滨工业大学社会计算与信息检索研究中心和北京语言大学合作标注的中文语义依存图数据，其中按照句子来源分为两个子集，分别是新闻集（NEWS）和小学课本集（TEXT），前者句子较长、较复杂，后者句子较短、较简单。
+而英文的语义依存图分析语料库来自SemEval-2015 Task 18\cite{oepen-etal-2015-semeval}英文广义语义依存图数据集。
+该数据集一共有三种标注规范（DM、PAS和PSD），每种规范都有两部分测试数据集，即同领域（IN-DOMAIN）与异领域（OUT-OF-DOMAIN)测试数据。
+中英文数据集的相关信息见表\ref{tbl:sdp-statistics}。
+值得注意的是，由于DM、PAS和PSD是在相同的语料上按照不同的标注规范标注的，它们的各个集合的句子数是相同的，只有标签数量不同。
+
+在中文数据集上，本章与以下模型进行对比：
+\begin{itemize}
+    \item IHS-RD-Belarus\cite{artsymenia-etal-2016-ihs}：该方法由Artsymenia等人于2016年提出，其中使用了包括在线重排序（online reordering）的基于转移的依存分析方法，并用预处理和后处理解决一些图结构的分析问题。
+    \item OCLSP\cite{jin-etal-2016-oclsp}：该方法由Jin等人于2016年提出，其中使用了LSTM获取句中每个词的上下文相关表示，然后用这些表示向量计算句子中任意两个词之间存在弧的可能（lbpg）。
+    由于其初始方法无法保证生成依存图，他们又使用了Chu-Liu-Edmond算法\cite{chu-liu-1965-shortest}进行解码（lbpgs）。
+    另外他们还尝试了使用更高的阈值控制多父节点词出现的概率（lbpgs75）。
+    
+    \item OSU\_CHGCG\cite{duan-etal-2016-osu}：该方法由Duan等人于2016年提出，其中首先使用由中文广义范畴语法（Generalized Categorial Grammar，简称GCG）数据训练的分析器生成依存图结构，然后使用逻辑回归分类器为每条依存弧预测具体的语义关系。
+    \item Two-Stage：该模型是参考Ding等人\cite{ding-etal-2014-dependency}于2014年提出的方法重新实现的基线模型。其中首先用传统依存树分析器预测出依存树结构，然后用一个支持向量机（Support Vector Machine，简称SVM）作为分类器从一个由规则产生的候选弧集合中选出一些弧加入其中组合成语义依存图。
+    \item Stack-LSTM：该模型是在本章提出的基于转移的语义依存图分析系统中直接使用原始Stack-LSTM的基线模型。
+\end{itemize}
+
+在英文数据集上，本章与以下模型进行对比：
+\begin{itemize}
+    \item \citet{du-etal-2015-peking} ：该模型由Du等人于2015年提出，其中利用了多个不同的基于转移和基于图的模型同时预测并对最终结果进行投票。
+    因此该模型是一个融合模型。
+    \item \citet{almeida-martins-2015-lisbon}：该模型由Almeida等人于2015年提出，其中使用了基于图的依存分析方法，使用了依存图结构中独有的二阶特征，并利用AD$^3$算法\cite{martins-etal-2011-dual}进行解码。
+    \item \citet{peng-etal-2017-deep}：该方法由Peng等人于2017年提出，他们使用一个基于图的方法，同时利用英文语义依存图数据库中的三种标注体系进行多任务学习，取得了该数据集上当时最好结果。由于本章中并没有使用多任务学习方法，这里列出的是他们没有使用多任务学习的基础模型结果。
+\end{itemize}
+
 
 实验中使用的评价指标包括不计算弧标签的F值（UF）、计算弧标签的F值（LF）、有多父节点的词中不计算弧标签的F值（NUF）和有多父节点的词中计算弧标签的F值（NLF）。
 其中值得注意的是NLF值，该指标只统计与有多个父节点的词相连的弧的计算标签的F值，也就是将目光集中在语义依存图分析中最难以解决的弧上，因此更能反映模型解决该问题的能力。
@@ -453,19 +474,7 @@ Wang和Cross等人探索了使用LSTM两个时间节点的隐层输出之差表�
 \end{table}
 
 表\ref{tbl:result-semeval16}中列出了中文语义依存图数据集上的实验结果。
-下面分别介绍表中所列的各个基线模型：
-\begin{itemize}
-    \item IHS-RD-Belarus\cite{artsymenia-etal-2016-ihs}：该方法由Artsymenia等人于2016年提出，其中使用了包括在线重排序（online reordering）的基于转移的依存分析方法，并用预处理和后处理解决一些图结构的分析问题。
-    \item OCLSP\cite{jin-etal-2016-oclsp}：该方法由Jin等人于2016年提出，其中使用了LSTM获取句中每个词的上下文相关表示，然后用这些表示向量计算句子中任意两个词之间存在弧的可能（lbpg）。
-    由于其初始方法无法保证生成依存图，他们又使用了Chu-Liu-Edmond算法\cite{chu-liu-1965-shortest}进行解码（lbpgs）。
-    另外他们还尝试了使用更高的阈值控制多父节点词出现的概率（lbpgs75）。
-    
-    \item OSU\_CHGCG\cite{duan-etal-2016-osu}：该方法由Duan等人于2016年提出，其中首先使用由中文广义范畴语法（Generalized Categorial Grammar，简称GCG）数据训练的分析器生成依存图结构，然后使用逻辑回归分类器为每条依存弧预测具体的语义关系。
-    \item Two-Stage：该模型是参考Ding等人\cite{ding-etal-2014-dependency}于2014年提出的方法重新实现的基线模型。其中首先用传统依存树分析器预测出依存树结构，然后用一个支持向量机（Support Vector Machine，简称SVM）作为分类器从一个由规则产生的候选弧集合中选出一些弧加入其中组合成语义依存图。
-    \item Stack-LSTM：该模型是在本章提出的基于转移的语义依存图分析系统中直接使用原始Stack-LSTM的基线模型。
-\end{itemize}
-
-表\ref{tbl:result-semeval16}中前5行是参加SemEval-2016 Task 9评测的系统的结果。
+其中前5行是参加SemEval-2016 Task 9评测的系统的结果。
 Two-Stage模型是本章重新实现的基线模型。
 而Stack-LSTM模型可以认为是本章提出的BS-IT模型去掉Bi-LSTM Subtraction和Incremental Tree-LSTM两个模块后的结果。
 BS-IT表示本章中提出的模型。
@@ -500,15 +509,7 @@ BS-IT表示本章中提出的模型。
 \end{table}
 
 表\ref{tbl:result-semeval15}中列出了英文语义依存图数据集上的实验结果，其中所列均为LF值，single表示单模型方法，ensemble表示多模型融合方法。
-下面分别介绍表中所列的各个基线模型：
-\begin{itemize}
-    \item \citet{du-etal-2015-peking} ：该模型由Du等人于2015年提出，其中利用了多个不同的基于转移和基于图的模型同时预测并对最终结果进行投票。
-    因此该模型是一个融合模型。
-    \item \citet{almeida-martins-2015-lisbon}：该模型由Almeida等人于2015年提出，其中使用了基于图的依存分析方法，使用了依存图结构中独有的二阶特征，并利用AD$^3$算法\cite{martins-etal-2011-dual}进行解码。
-    \item \citet{peng-etal-2017-deep}：该方法由Peng等人于2017年提出，他们使用一个基于图的方法，同时利用英文语义依存图数据库中的三种标注体系进行多任务学习，取得了该数据集上当时最好结果。由于本章中并没有使用多任务学习方法，这里列出的是他们没有使用多任务学习的基础模型结果。
-\end{itemize}
-
-表\ref{tbl:result-semeval15}中BS-IT表示本章提出的系统的结果。
+其中BS-IT表示本章提出的系统的结果。
 由于基线模型中有使用多模型融合的方法，表中也列出了将BS-IT方法与模型融合方法简单结合的结果。
 具体实现方法是在训练时使用不同随机初始化种子训练多个模型。
 在预测时，用这些模型算出的分数之和来选择接下来的转移动作。

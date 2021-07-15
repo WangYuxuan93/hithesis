@@ -1,6 +1,6 @@
 % !Mode:: "TeX:UTF-8"
 
-\chapter[基于图神经网络的语义依存图应用]{基于图神经网络的语义依存图应用}[Semantic Dependency Graph Application Based on Graph Neural Networks]
+\chapter[基于字级别依存关系的语义依存图应用]{基于字级别依存关系的语义依存图应用}[Semantic Dependency Graph Application Based on Character-Level Dependency]
 
 \section{引言}[Introduction]
 \label{sec:chapter5-intro}
@@ -83,11 +83,11 @@ Strubell等人\cite{strubell-etal-2018-linguistically}和Xia等人\cite{xia-etal
 本章针对中文预训练模型以字为基本输入单位的特点，提出了基于字级别依存关系的强化预训练模型，并在中文语义角色标注和关系抽取任务上验证了其有效性。
 
 
-\section{基于字级别依存关系的强化预训练模型}[Pre-trained Model Enhancement Based on Character-Level Dependency Relations]
+\section{基于字级别依存关系的强化预训练模型}[Pre-trained Model Enhancement Based on Character-Level Dependencies]
 
 \subsection{预训练模型的基本输入单元}[Basic Input Units in Pre-trained Models]
 
-本文第\ref{sec:chapter1-informal}节中已对预训练模型BERT进行了介绍。
+本文第\ref{sec:chapter1-robust}节中已对预训练模型BERT进行了介绍。
 其使用遮盖语言模型作为学习目标，将目标词遮盖后利用其上下文预测该词，实现了同时利用左右两个方向的上下文信息。
 以BERT为代表的预训练模型的一个重要特点是词片段（word piece）向量\cite{wu-etal-2016-google}的使用。
 这些词片段向量代替了传统神经网络模型中的词向量，成为了英文等很多语言中预训练模型的基本输入单元。
@@ -130,16 +130,16 @@ Strubell等人\cite{strubell-etal-2018-linguistically}和Xia等人\cite{xia-etal
 他们仅仅在英文上训练了这种基于字母的BERT，而对于其他很多语言，现有的预训练模型基本都还是基于词片段的。
 此外，由于本文的主要研究内容是中文语义依存图的应用，且目前自然语言处理领域绝大部分研究者仍然在英文等其他语言上使用基于词片段的预训练模型，而在中文上使用基于字的预训练模型，本章将集中研究中文的预训练模型和依存结构和融合方法。
 
-\subsection{字级别依存关系强化网络}[Character-Level Dependency-Infused Network]
+\subsection{字级别依存关系强化网络}[Character-Level Dependency-Enhanced Network]
 \label{sec:chapter5-char-level-dep-infusion}
 
 \begin{figure}[hbtp]
 	\centering
-	\includegraphics[width=0.95\textwidth]{figures/dependency-infused-network.pdf}
-	\bicaption[fig:dependency-infused-network]{}{字级别依存关系强化网络结构示意图}{Fig.$\!$}{Character-Level Dependency-Infused Network.}
+	\includegraphics[width=0.95\textwidth]{figures/dependency-enhanced-network.pdf}
+	\bicaption[fig:dependency-enhanced-network]{}{字级别依存关系强化网络结构示意图}{Fig.$\!$}{Character-Level Dependency-Enhanced Network.}
 \end{figure}
 
-本节将具体介绍本章提出的字级别依存关系强化网络，其结构如图\ref{fig:dependency-infused-network}所示。
+本节将具体介绍本章提出的字级别依存关系强化网络，其结构如图\ref{fig:dependency-enhanced-network}所示。
 该模型建立在中文BERT模型的基础上，图中EMB表示输入字向量（embeddings），SA表示自注意力层（self-attention layer），LN表示层标准化（layer normalization），FF表示前馈层（feed-forward layer），而GA表示图注意力层（graph attention layer）。
 
 图注意力网络\cite{velickovic-etal-2018-gat}（Graph Attention Network，简称GAT）是自注意力网络的一种变体，通过注意机制将图结构融入神经网络中，模型中的图注意力层使用图注意力网络将字级别依存关系融入到预训练模型每一层。
@@ -209,13 +209,14 @@ $w_i \rightarrow w_j \in G_w(X)$表示$G_w(X)$中存在一条从$w_i$指向$w_j$
 由于在生成两种字级别依存弧的时候本章都选取了每个词的第一个字作为核心节点，每个词内的各个字的信息也通过词内弧传递到了第一个字，因此最终输出时使用每个词第一个字的隐层状态作为整个词的表示向量。
 
 
-\section{字级别依存关系强化的预训练模型的应用}[Application of Character-Level Dependency-Enhanced Pre-trained Models]
+\section{字级别依存关系强化网络的应用}[Application of Character-Level Dependency-Enhanced Network]
 
 本章第\ref{sec:chapter5-char-level-dep-infusion}节中介绍的字级别依存关系强化网络能有效将依存结构（句法依存树或语义依存图）融入预训练模型，从而获取结构信息强化的上下文相关词表示。
 在此基础上，只需要使用前馈网络和softmax分类器等简单的神经网络模块就能完成很多自然语言处理任务，并有效提高预训练模型的性能。
 本节将分别对基于强化预训练模型的命名实体识别和关系抽取模型进行介绍。
 
-\subsection{基于预训练模型的命名实体识别模型}[Semantic Role Labeling Model Based on Pre-trained Models]
+\subsection{命名实体识别上的应用}[Application on Semantic Role Labeling]
+\label{sec:chapter5-srl-model}
 
 根据语义角色定义的不同，语义角色标注（Semantic Role Labeling，简称SRL）任务可以分为两类，即基于段的（span-based）语义角色标注和基于词的（word-based）语义角色标注。
 其中前者使用多个连续的词组成的段作为语义角色，而后者则使用单个词作为语义角色。
@@ -286,9 +287,10 @@ $w_i \rightarrow w_j \in G_w(X)$表示$G_w(X)$中存在一条从$w_i$指向$w_j$
 其中$\bm{h}_p$为当前谓词的表示向量，$\bm{h}_j$为句中第$j$个词的表示向量，$p(r|\bm{h}_p,\bm{h}_j)$表示第$j$个词与当前谓词间语义关系为$r$的概率。
 在语义标签的集合中，有一个额外的“O”标签，用于表示当前词与谓词之间无关系。
 
-\subsection{基于预训练模型的关系抽取模型}[Relation Extraction Model Based on Pre-trained Models]
+\subsection{关系抽取上的应用}[Application on Relation Extraction]
+\label{sec:chapter5-re-model}
 
-关系抽取（Relation Extraction，简称RE）任务目的是预测句中给定的两个实体间的关系。
+关系抽取（Relation Extraction，简称RE）任务目的是预测句中给定的两个实体间的关系，该任务对于构建知识图谱有重要意义。
 例如对于句子“我抬头看天”，给定两个实体分别为“我”和“头”，该任务需要预测二者的关系为Part-Whole，即部分与整体关系。
 
 \begin{figure}[hbtp]
@@ -311,55 +313,183 @@ $w_i \rightarrow w_j \in G_w(X)$表示$G_w(X)$中存在一条从$w_i$指向$w_j$
 
 \subsection{实验设置}[Experimental Settings]
 
-\subsection{语义角色标注实验结果}[]
+本章首先在CoNLL 2009语义角色标注数据集的中文部分测试了提出的字级别依存关系强化网络，然后又在SanWen和FinRE两个中文关系抽取数据集上测试了该网络。
+这三个数据集的相关信息见表\ref{tbl:chapter5-statistics}。
+其中CoNLL 2009数据集为基于字的语义角色标注数据集，其中已经预先给出了每句话中的所有谓词，只需要进行谓词消歧、论元识别及分类。
 
-
-\begin{table}[htpb]
-    \bicaption[tbl:srl-result]{}{CoNLL 2009数据集上语义角色标注实验结果}{Table$\!$}{Semantic Role Labeling results on CoNLL-2009.}
+\begin{table}[htbp]
+    \bicaption[tbl:chapter5-statistics]{}{语义角色标注和关系抽取数据集信息}{Table$\!$}{Statistics of Semantic Role Labeling and Relation Extraction dataset.}
     \vspace{0.5em}\centering\wuhao
-    \begin{tabular}{lcccc}
+    \begin{tabular}{lcccccc}
         \toprule[1.5pt]
-        模型 & & P & R & F1 \\
+        数据集 & 标签数 & 训练集 & 开发集 & 测试集 & 平均句子长度 \\
         \midrule[1pt]
-        \multicolumn{4}{l}{\textit{w/o BERT}}  \\
-        %\hline
-        \citet{roth-lapata-2016-neural} & $\oslash$ & 83.2 & 75.9 & 79.4 \\
-        \citet{marcheggiani-etal-2017-simple} & $\otimes$ & 83.4 & 79.1 & 81.2 \\
-        \citet{he-etal-2018-syntax} & $\oslash$ & 84.2 & 81.5 & 82.8 \\
-        \citet{li-etal-2018-unified} & $\oslash$ & 84.8 & 81.2 & 83.0 \\
-        \citet{he-etal-2019-syntax} & $\odot$ & 84.6 & 84.5 & 84.6 \\
-        \citet{munir-etal-2021-adaptive} & $\oslash$ & 84.7 & 85.1 & 84.9 \\
-        \citet{xia-etal-2019-syntax} & $\oslash$ & 84.6 & 85.7 & 85.1 \\
-        \hline
-        \multicolumn{4}{l}{\textit{w/ BERT}}  \\
-        %\hline
-        \citet{he-etal-2019-syntax} & $\odot$ & 86.2 & 86.7 & 86.4 \\
-        \citet{xia-etal-2019-syntax} & $\oslash$ & 88.0 & 89.1 & 88.5 \\
-        \citet{li-etal-2020-high} & $\otimes$ & -	& - & 88.7 \\
-        Baseline & $\otimes$ & 88.2 & 88.3 & 88.2 \\
-        Word-Level GCN & $\oslash$ & 88.6 & 88.5 & 88.5 \\
-        Word-Level GCN & $\odot$ & 90.8 & 90.3 & 90.5  \\
-        Ours & $\oslash$ & 89.2 & 88.5 & 88.9 \\
-        Ours & $\odot$ & 91.9 & 91.8 & 91.9  \\
-        \hline
-        \multicolumn{4}{l}{\textit{w/ RoBERTa}}  \\
-        %\hline
-        Baseline & $\otimes$ & 88.6 & 88.1 & 88.4 \\
-        Word-Level GCN &$\oslash$ & 88.7 & 88.6 & 88.6 \\
-        Word-Level GCN &$\odot$ & 90.3 & 90.5 & 90.4 \\
-        Ours &$\oslash$ & 88.9 & 89.1 & 89.0 \\
-        Ours &$\odot$ & 92.2 & 92.0 & 92.1 \\
+        CoNLL 2009 & 37 & 22,277 & 1,762 & 2,556 & 27.52 \\
+        SanWen     & 9  & 17,227 & 1,793 & 2,220 & 89.41 \\
+        FinRE      & 43 & 13,486 & 1,489 & 3,727 & 143.62 \\
         \bottomrule[1.5pt]
     \end{tabular}
 \end{table}
 
+在CoNLL 2009数据集上的实验中，本章分别使用了句法依存树和语义依存图作为输入到模型的额外依存关系。
+其中分别尝试了模型预测的和人工标注的句法依存树，均由CoNLL 2009公开评测官方提供。
+而由于CoNLL 2009数据集上没有人工标注的语义依存图，本章只使用了模型预测的语义依存图作为额外输入。
+用于预测的模型为在SemEval 2016 Task 9中文语义依存图中的两个数据集上训练的Biaffine依存图分析器。
+在该数据集上，本章与以下模型进行了对比：
 
+\begin{itemize}
+    \item \citet{roth-lapata-2016-neural}：该模型将句法树上的路径转化为向量向神经网络中加入句法信息。
+    \item \citet{marcheggiani-etal-2017-simple}：该模型将双向LSTM应用到语义角色标注任务中。
+    \item \citet{he-etal-2018-syntax}：该模型使用人工标注句法信息帮助模型进行论元剪枝，删除不可能的论元从而提高预测准确率。
+    \item \citet{he-etal-2019-syntax}：该模型在使用句法信息进行论元剪枝的基础上还使用了预训练模型BERT获取上下文相关词向量作为输入。
+    \item \citet{li-etal-2018-unified}：该模型使用图卷积网络将句法信息直接融入神经网络中。
+    \item \citet{munir-etal-2021-adaptive}：该模型使用适应性卷积网络和Tree-LSTM将句法信息直接融入神经网络。
+    \item \citet{xia-etal-2019-syntax}：该模型使用多任务学习框架同时学习句法分析任务和语义角色标注，从而隐式地将句法信息通过共享的参数传递给语义角色标注任务。
+    \item \citet{li-etal-2020-high}：该模型在预训练模型的基础上将高维图结构特征引入模型中，进一步提高了模型性能。
+    \item BERT：本章实现的使用BERT模型作为输入的基线模型，没有使用额外的结构化信息。
+    \item BERT + Word-Level GCN：本章实现的在BERT模型基础上用图卷积网络融入词级别句法信息的基线模型。
+\end{itemize}
 
-\subsection{关系抽取实验结果}
+在SanWen和FinRE两个关系抽取数据集上，本章使用了预测的语义依存图作为额外输入。
+用于预测的模型与CoNLL 2009实验中用到的相同。
+在关系抽取任务上，本章与以下模型进行了对比：
+\begin{itemize}
+    \item \citet{xu-etal-2020-chinese}：该模型使用网格门控循环神经⽹络（lattice gated recurrent neural network）对句子进行建模。
+    \item \citet{zhang-yu-2020-chinese}：该模型使用了网格LSTM网络对输入句子进行建模，同时还使用了BERT作为其输入。
+    \item \citet{li-etal-2019-chinese}：该模型使用了多粒度网格网络（multi-grained lattice framework）对输入句子进行建模，同时还使用了来自知网的外部数据作为额外信息。
+    \item BERT：本章实现的使用BERT模型作为输入的基线模型，没有使用额外的结构化信息。
+\end{itemize}
+
+在训练过程中，本章分别使用中文预训练模型BERT和RoBERTa对本章提出的字级别依存关系强化网络的参数进行初始化。
+使用AdamW算法\cite{loshchilov-hutter-2019-decoupled}优化参数，并将初始学习率设置为2e-5。
+
+本章在语义角色标注实验中使用的评价指标包括精确率（P）、召回率（R）、F1值（F1）以及谓词消歧子任务的准确率（ACC）。
+而在关系抽取任务上使用F1值（F1）作为评价指标。
+
+\subsection{语义角色标注实验结果}[Results on Semantic Role Labeling]
 
 
 \begin{table}[htpb]
-    \bicaption[tbl:srl-result]{}{FinRE和SanWen数据集上关系抽取实验结果}{Table$\!$}{Relation Extraction results on FinRE and SanWen.}
+    \bicaption[tbl:srl-result]{}{CoNLL 2009中文数据集上语义角色标注实验结果}{Table$\!$}{Chinese Semantic Role Labeling results on CoNLL-2009.}
+    \vspace{0.5em}\centering\wuhao
+    \begin{tabular}{lccccc}
+        \toprule[1.5pt]
+        模型 & BERT & 结构信息 & P & R & F1 \\
+        \midrule[1pt]
+        \citet{roth-lapata-2016-neural}       & & \checkmark & 83.2 & 75.9 & 79.4 \\
+        \citet{marcheggiani-etal-2017-simple} & & & 83.4 & 79.1 & 81.2 \\
+        \citet{he-etal-2018-syntax}           & & \checkmark & 84.2 & 81.5 & 82.8 \\
+        \citet{li-etal-2018-unified}          & & \checkmark & 84.8 & 81.2 & 83.0 \\
+        \citet{he-etal-2019-syntax}           & & \checkmark & 84.6 & 84.5 & 84.6 \\
+        \citet{munir-etal-2021-adaptive}      & & \checkmark & 84.7 & 85.1 & 84.9 \\
+        \citet{xia-etal-2019-syntax}          & & \checkmark & 84.6 & 85.7 & 85.1 \\
+        \citet{he-etal-2019-syntax}           & \checkmark & \checkmark & 86.2 & 86.7 & 86.4 \\
+        \citet{xia-etal-2019-syntax}          & \checkmark & \checkmark & 88.0 & 89.1 & 88.5 \\
+        \citet{li-etal-2020-high}             & \checkmark & & -	& - & 88.7 \\
+        BERT                                  & \checkmark & & 88.2 & 88.3 & 88.2 \\
+        BERT + Word-Level GCN                 & \checkmark & \checkmark & 88.6 & 88.5 & 88.5 \\
+        Ours + Syntax                         & \checkmark & \checkmark & 89.2 & 88.5 & 88.9 \\
+        Ours + SDG                            & \checkmark & \checkmark & 89.1 & 88.7 & 88.9 \\
+        Ours + Syntax + SDG                   & \checkmark & \checkmark & 89.2 & 89.0 & 89.1 \\
+        \bottomrule[1.5pt]
+    \end{tabular}
+\end{table}
+
+表\ref{tbl:srl-result}中列出了CoNLL 2009语义角色标注中文数据集上的实验结果，表中使用对号显示了每个模型是否使用BERT作为输入以及是否使用了结构信息（句法依存树或语义依存图）作为输入。
+其中所列本章提出的模型包括：
+\begin{itemize}
+    \item Ours + Syntax：本章提出的字级别依存关系强化的预训练BERT模型，使用句法依存树作为结构化信息输入。
+    \item Ours + SDG：本章提出的字级别依存关系强化的预训练BERT模型，使用语义依存图作为结构化信息输入。
+    \item Ours + Syntax + SDG：本章提出的字级别依存关系强化的预训练BERT模型，同时使用句法依存树和语义依存图作为结构化信息输入，在模型每一层使用两个独立的图注意力网络分别对句法依存树和语义依存图进行建模，然后将结果相加。
+\end{itemize}
+
+从表中结果可以发现，使用BERT作为输入的模型在性能上普遍显著超过了不使用BERT的模型。
+本章实现的只使用BERT的基线模型已经超过了大部分此前的方法的结果。
+另外，本章实现的另一个使用图卷积网络将词级别句法信息融入BERT输出的基线模型，在BERT模型的基础上获得了性能提升。
+而本章提出的字级别依存关系强化的预训练BERT模型则取得了目前最好结果。
+值得注意的是，分别使用句法依存树和语义依存图作为输入时，获取了基本相同的最好结果。
+为了进一步探索句法依存树和语义依存图对于该任务的帮助是否是重复、可以相互替代的，本章又尝试了同时将句法依存树和语义依存图作为模型的结构信息输入，在每一层使用两个独立的图注意力网络对它们分别建模，然后将二者的隐层状态相加。
+实验结果表明，同时使用句法依存树和语义依存图作为输入时，模型性能得到进一步提升。
+这也说明了二者为模型提供的是不同类型的信息。
+
+\begin{table}[htpb]
+    \bicaption[tbl:srl-result-sub-task]{}{CoNLL 2009中文数据集上语义角色标注子任务实验结果}{Table$\!$}{Chinese Semantic Role Labeling sub-task results on CoNLL-2009.}
+    \vspace{0.5em}\centering\wuhao
+    \begin{tabular}{lcccc}
+        \toprule[1.5pt]
+        \multirow{2}{*}{模型}& \multicolumn{3}{c}{论元标注} & 谓词消歧 \\
+        \cmidrule(r){2-4} \cmidrule(r){5-5}
+         & P & R & F1 & ACC \\
+        \midrule[1pt]
+        BERT                   & 84.6 & 84.8 & 84.7 & 96.3 \\
+        BERT + Word-Level GCN  & 85.2 & 85.0 & 85.1 & 96.3 \\
+        Ours + Syntax          & 86.1 & 85.1 & 85.6 & 96.2  \\
+        Ours + SDG             & 85.8 & 85.3 & 85.6 & 96.3 \\
+        Ours + Syntax + SDG    & 86.1 & 85.8 & 86.0 & 96.2  \\
+        \bottomrule[1.5pt]
+    \end{tabular}
+\end{table}
+
+根据第\ref{sec:chapter5-srl-model}节的介绍，CoNLL 2009语义角色标注任务包括两个子任务：谓词消歧和论元标注（论元识别和分类）。
+为了分析本章提出的方法对各个子任务的影响，本章在表\ref{tbl:srl-result-sub-task}中列出了本章模型在各子任务上的结果。
+根据表中信息可以发现，所有模型在谓词消歧上都取得了相差不大的结果，这很可能是因为该任务是一个较简单的任务，且其准确率已经很高，加入额外结构信息也无法对其产生帮助。
+而本章提出的模型为语义角色标注任务带来的性能提升主要来自论元标注子任务。
+可以发现，在消除了谓词消歧性能的影响后，本章提出的模型带来的性能提升变得更为明显。
+
+\begin{table}[htpb]
+    \bicaption[tbl:srl-result-with-gold]{}{CoNLL 2009数据集上使用人工标注句法树的实验结果}{Table$\!$}{Results on CoNLL-2009 with gold syntactic trees.}
+    \vspace{0.5em}\centering\wuhao
+    \begin{tabular}{lccccc}
+        \toprule[1.5pt]
+        模型 & P & R & F1 \\
+        \midrule[1pt]
+        BERT                               & 88.2 & 88.3 & 88.2 \\
+        BERT + Word-Level GCN (Predicted)  & 88.6 & 88.5 & 88.5 \\
+        BERT + Word-Level GCN (Gold)       & 90.8 & 90.3 & 90.5 \\
+        Ours + Syntax (Predicted)          & 89.2 & 88.5 & 88.9 \\
+        Ours + Syntax (Gold)               & 91.9 & 91.8 & 91.9 \\
+        \bottomrule[1.5pt]
+    \end{tabular}
+\end{table}
+
+为了进一步探索本章提出的字级别依存关系强化模型的上限，本章尝试用人工标注的正确句法树（Gold）替换此前实验中使用的模型预测的句法树（Predicted）输入模型中。
+由于在CoNLL 2009数据集上只有句法依存树的人工标注，而没有语义依存图的人工标注，这里只尝试了使用人工标注句法树作为输入。
+该实验结果如表\ref{tbl:srl-result-with-gold}所示。
+根据表中结果可以发现，当使用人工标注的正确句法树替换模型预测句法树时，无论是本章提出的模型还是使用词级别依存关系的基线模型的性能都获得了显著提升。
+而其中本章提出的模型的性能提升比基线模型更加明显，且使用正确句法树时，本章提出的模型性能与基线模型的性能差距变得更大。
+这说明了本章提出的模型有更高的上限。
+
+\begin{table}[h]
+    \bicaption[tbl:srl-result-subtract]{}{CoNLL 2009数据集上使用不同依存弧的实验结果}{Table$\!$}{Results on CoNLL-2009 with different sets of dependency arcs.}
+    \vspace{0.5em}\centering\wuhao
+    \begin{tabular}{lcccc}
+        \toprule[1.5pt]
+        模型 & 句法信息 & P & R & F1\\
+        \midrule[1pt]
+        BERT & - & 84.7 & 84.9 & 84.8 \\
+        Ours + Syntax & Predicted & 86.0 & 85.0 & 85.5 (+0.7) \\
+        Ours + Syntax & Gold $\cap$ Predicted & 87.5 & 86.8 & 87.1 (+2.3) \\
+        Ours + Syntax & Gold $\setminus$ Predicted & 88.1 & 87.0 & 87.6 (+2.8) \\
+        Ours + Syntax & Gold & 90.3 & 90.1 & 90.2 (+5.4)  \\
+        \bottomrule[1.5pt]
+    \end{tabular}
+\end{table}
+
+接下来，为了更深入的探索模型预测句法树和人工标注的正确句法树对本章提出模型的影响，本章使用了不同集合的依存弧作为输入，实验结果如表\ref{tbl:srl-result-subtract}所示。
+由于加入依存信息不会影响谓词消歧子任务的结果，同时为了更清晰地显示出模型之间的差距，表中所列结果是论元标注子任务的结果。
+而其中F1值括号里的值表示的是该模型相对BERT基线模型的性能提升。
+其中“Gold $\cap$ Predicted”表示模型预测的句法树中正确的弧组成的集合，可以认为这个集合中的弧是容易预测的。
+根据CoNLL 2009官方提供的模型预测句法树的准确率，这部分弧占总数的82.6\%。
+而“Gold $\setminus$ Predicted”表示人工标注的句法树中不在模型预测的句法树中的弧组成的集合，也就是说模型错误预测了这些弧。
+可以认为这个集合中的弧是难以预测正确的，占弧总数的17.4\%。
+根据实验结果可以发现，不到五分之一的难以预测的弧为模型带来的性能提升反而比约占五分之四的容易预测的弧多。
+该实验说明了目前依存分析器预测错误的少数依存弧中还蕴涵大量对于语义角色标注有帮助的信息，而只要能提升依存分析器的性能，将这些信息加入本章提出的模型，就能够获得更显著的性能提升。
+
+\subsection{关系抽取实验结果}[Results on Relation Extraction]
+
+
+\begin{table}[htpb]
+    \bicaption[tbl:re-result]{}{FinRE和SanWen数据集上关系抽取实验结果}{Table$\!$}{Relation Extraction results on FinRE and SanWen.}
     \vspace{0.5em}\centering\wuhao
     \begin{tabular}{lc}
         \toprule[1.5pt]
@@ -382,8 +512,22 @@ $w_i \rightarrow w_j \in G_w(X)$表示$G_w(X)$中存在一条从$w_i$指向$w_j$
     \end{tabular}
 \end{table}
 
+表\ref{tbl:re-result}中列出了在SanWen和FinRE两个中文关系抽取数据集上的实验结果。
+在该任务上，由于没有人工标注的句法依存树或语义依存图，本章只使用了模型预测的语义依存图作为本章提出的字级别依存关系强化模型的输入。
+另外，如第\ref{sec:chapter5-re-model}节中所介绍，本章使用的关系抽取模型首先在两个实体前后加入特殊符号，然后将修改后序列输入字级别依存关系强化模型，最后直接拼接两个特殊符号的输出向量通过前馈网络和softmax分类器预测实体间的关系。
+该方法适于应用在基于字的预训练模型上，但比较难与基于词的依存信息融合方法一起使用。
+因此本章只对比了此前的工作、使用BERT的基线模型和本章提出的的字级别依存关系强化模型的结果。
+
+根据表中结果可以发现，本章实现的基于BERT的基线模型的性能已经远好于此前几个工作提出的模型。
+而在此基础上，本章提出的字级别依存关系强化模型在使用模型预测的语义依存图作为输入时在两个数据集上都取得了明显的性能提升。
 
 \section{本章小结}[Conclusions]
+
+本章针对中文语义依存图在其他自然语言处理任务中的应用问题，结合中文预训练模型使用字级别输入的特点，设计了字级别依存关系强化网络，将字级别的依存信息与预训练模型紧密结合，从而获取包含字级别依存信息的上下文相关表示向量，作为其他任务的输入。
+为了证明该模型的有效性，本章在中文语义角色标注和关系抽取任务上进行了实验。
+实验表明，通过本章提出的字级别依存关系强化网络，中文语义依存图能有效帮助提升这两个任务上模型的性能。
+并且语义依存图与句法依存树能为模型提供不同类型的结构信息，二者结合时能进一步提升模型性能。
+本章提出的模型在中文语义角色标注和关系抽取任务上都取得了目前最好结果。
 
 
 % Local Variables:
